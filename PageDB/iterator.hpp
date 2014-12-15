@@ -38,6 +38,9 @@ namespace PageDB {
             //TODO: Not Imp
             throw "Not Imp";
         }
+        char& operator[](int idx) {
+            return Get()[idx];
+        }
     };
     struct ConstIterator {
         Scheduler* pgdb;
@@ -72,6 +75,9 @@ namespace PageDB {
         virtual std::pair<int, int> NextLocation() {
             //TODO: Not Imp
             throw "Not Imp";
+        }
+        const char& operator[](int idx) {
+            return Get()[idx];
         }
     };
     bool operator==(const Iterator& lhs, const Iterator& rhs) {

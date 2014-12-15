@@ -7,11 +7,11 @@ void test(PageDB::Scheduler* pgdb) {
     PageDB::ConstIterator Y(pgdb, "testPageDB.txt");
     int newPage = X.file->newPage();
     Y.Goto(newPage - 1, 0);
-    int ans = Y.Get()[0];
+    int ans = Y[0];
     std::cout << newPage << std::endl;
     std::cout << ans << std::endl;
     X.Goto(newPage, 0);
-    X.Get()[0] = ans + 1;
+    X[0] = ans + 1;
 }
 
 int main() {
