@@ -17,7 +17,7 @@ namespace TypeDB {
     struct ReadExpr : public Expr {
         std::string tbl, name;
         ReadExpr(const std::string& _tbl, const std::string& _name) : tbl(_tbl), name(_name) {}
-        ReadExpr(const std::string& _name) : ReadExpr("", _name) {}
+        ReadExpr(const std::string& _name) : tbl(""), name(_name) {}
         virtual pObject Calc(const Row& row);
     };
     struct UnaryExpr : public Expr {
@@ -32,7 +32,7 @@ namespace TypeDB {
     struct BinaryExpr : public Expr {
         Expr *l, *r;
         enum OpCode {
-            Add,
+            Plus,
             Minus,
             Equal,
             NotEqual,

@@ -5,10 +5,11 @@
 #include <map>
 #include <string>
 #include <thread>
+#include <chrono>
 
 namespace PageDB {
     //Sleep Seconds
-    const int SCHEDULE_LOOP_DELAY = 100;
+    const auto SCHEDULE_LOOP_DELAY = std::chrono::milliseconds(100);
     class Scheduler {
         std::thread ScheduleThread;
         void ScheduleLoop();
@@ -18,6 +19,7 @@ namespace PageDB {
         std::map<std::pair<File*, int>, PageDesc*> pageIndex;
         virtual void Schedule() = 0;
     public:
+        Scheduler() : running(false) {}
         void StartSchedule();
         void StopSchedule();
         bool Running() {
@@ -25,9 +27,9 @@ namespace PageDB {
         }
         File* OpenFile(const std::string& fn);
         PageDesc* GetPage(File* file, int page_id);
+        PageSession GetSession(File* file, int page_id);
+        PageWriteSession GetWriteSession(File* file, int page_id);
         virtual ~Scheduler();
-    };
-    class LRUScheduler : public Scheduler{
     };
 }
 

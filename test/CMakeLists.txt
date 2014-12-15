@@ -1,0 +1,2 @@
+ADD_EXECUTABLE(testPageDB testPageDB.cpp)
+TARGET_LINK_LIBRARIES(testPageDB PageDB)
