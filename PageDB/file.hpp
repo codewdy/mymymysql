@@ -6,6 +6,9 @@
 #include <unordered_set>
 
 namespace PageDB {
+    struct Location {
+        unsigned short Page, Offset;
+    };
     struct Page;
     const int PAGE_SIZE = 8192;
     const int MaxPage = 2045;
@@ -19,8 +22,7 @@ namespace PageDB {
     struct File {
         std::fstream raw;
         int entryPageID;
-        int eofPage;
-        int eofOffset;
+        Location eof;
         std::unordered_map<int, int> pageMap;
         int pageOffset(int vaddr);
         int newPage();
