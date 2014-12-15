@@ -44,6 +44,7 @@ namespace PageDB {
         return PageWriteSession(GetPage(file, page_id));
     }
     Scheduler::~Scheduler() {
+        StopSchedule();
         for (auto item : pageIndex)
             delete item.second;
         for (auto item : fileIndex)
