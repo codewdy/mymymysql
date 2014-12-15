@@ -52,14 +52,17 @@ namespace PageDB {
         writeZeroPage(raw, 1);
         writebackFileHeader();
     }
-    void File::writebackFileHeader() {
+    void File::writebackFileHeaderCore() {
         assert(raw);
         raw.seekp(0);
-        unsigned short tmp;
         raw.write((const char*)&MagicNumber, 4);
         raw.write((const char*)&entryPageID, 2);
         raw.write((const char*)&eofPage, 2);
         raw.write((const char*)&eofOffset, 2);
+    }
+    void File::writebackFileHeader() {
+        writebackFileHeaderCore();
+        unsigned short tmp;
         tmp = pageMap.size();
         raw.write((const char*)&tmp, 2);
         for (auto item : pageMap) {
