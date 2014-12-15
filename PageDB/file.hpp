@@ -8,6 +8,9 @@
 namespace PageDB {
     struct Location {
         unsigned short Page, Offset;
+        Location() {}
+        Location(unsigned short _Page, unsigned short _Offset)
+            : Page(_Page), Offset(_Offset) {}
     };
     struct Page;
     const int PAGE_SIZE = 8192;
