@@ -26,9 +26,8 @@ namespace PageDB {
         void decRef() {
             ref--;
         }
-        void writeAndDecRef() {
+        void write() {
             dirty = true;
-            decRef();
         }
         void WriteBack() {
             if (dirty) {
@@ -104,9 +103,16 @@ namespace PageDB {
             incRef();
             return * this;
         }
+        void flush() {
+            if (desc) {
+                desc->write();
+            }
+        }
         void decRef() {
-            if (desc)
-                desc->writeAndDecRef();
+            if (desc) {
+                desc->write();
+                desc->decRef();
+            }
         }
         void incRef() {
             if (desc)
