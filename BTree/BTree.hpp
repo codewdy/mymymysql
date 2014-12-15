@@ -6,6 +6,18 @@
 
 namespace BTree {
     typedef std::pair<int, int> ValueType;
+    struct BTreeConstIterator : public PageDB::ConstIterator {
+        //TODO
+        BTreeConstIterator(PageDB::Scheduler* _pgdb, const std::string& fn);
+        BTreeConstIterator(PageDB::Scheduler* _pgdb, PageDB::File* _file);
+        ValueType value();
+    };
+    struct BTreeIterator : public PageDB::Iterator {
+        //TODO
+        BTreeIterator(PageDB::Scheduler* _pgdb, const std::string& fn);
+        BTreeIterator(PageDB::Scheduler* _pgdb, PageDB::File* _file);
+        ValueType value();
+    };
     struct BTree {
         BTree(PageDB::Scheduler* pgdb, const std::string& fn);
         std::pair<bool, ValueType> find(int key);
@@ -18,12 +30,6 @@ namespace BTree {
         std::pair<bool, ValueType> find(int hash1, int hash2, int hash3);
         bool set(int hash1, int hash2, int hash3, ValueType value, bool force = false);
         bool remove(int hash1, int hash2, int hash3);
-    };
-    struct BTreeConstIterator : public PageDB::ConstIterator {
-        //TODO
-        BTreeConstIterator(PageDB::Scheduler* _pgdb, const std::string& fn);
-        BTreeConstIterator(PageDB::Scheduler* _pgdb, PageDB::File* _file);
-        ValueType value();
     };
 }
 

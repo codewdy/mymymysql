@@ -44,6 +44,8 @@ namespace PageDB {
     }
     void File::initFile() {
         entryPageID = 0;
+        eofPage = 0;
+        eofOffset = 0;
         pageMap.clear();
         pageMap[0] = 0;
         writeZeroPage(raw, 0);
@@ -56,6 +58,8 @@ namespace PageDB {
         unsigned short tmp;
         raw.write((const char*)&MagicNumber, 4);
         raw.write((const char*)&entryPageID, 2);
+        raw.write((const char*)&eofPage, 2);
+        raw.write((const char*)&eofOffset, 2);
         tmp = pageMap.size();
         raw.write((const char*)&tmp, 2);
         for (auto item : pageMap) {
@@ -74,6 +78,10 @@ namespace PageDB {
         }
         raw.read((char*)&tmp, 2);
         entryPageID = tmp;
+        raw.read((char*)&tmp, 2);
+        eofPage = tmp;
+        raw.read((char*)&tmp, 2);
+        eofOffset = tmp;
         raw.read((char*)&tmp, 2);
         int size = tmp;
         for (int i = 0; i < size; i++) {
