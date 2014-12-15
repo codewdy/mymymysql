@@ -31,9 +31,6 @@ namespace PageDB {
             auto nxt = NextLocation();
             Goto(nxt.first, nxt.second);
         }
-        bool End() {
-            return pageid < 0;
-        }
         virtual std::pair<int, int> NextLocation() {
             //TODO: Not Imp
             throw "Not Imp";
@@ -68,9 +65,6 @@ namespace PageDB {
         void Next() {
             auto nxt = NextLocation();
             Goto(nxt.first, nxt.second);
-        }
-        bool End() {
-            return pageid < 0;
         }
         virtual std::pair<int, int> NextLocation() {
             //TODO: Not Imp
