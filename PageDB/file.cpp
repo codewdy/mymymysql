@@ -38,7 +38,9 @@ namespace PageDB {
                 break;
             }
         pageMap[vaddr] = paddr;
+        raw_mutex.lock();
         writeZeroPage(raw, paddr + 1);
+        raw_mutex.unlock();
         writebackFileHeader();
         return vaddr;
     }
@@ -56,20 +58,27 @@ namespace PageDB {
         eof.Offset = 0;
         pageMap.clear();
         pageMap[0] = 0;
+        raw_mutex.lock();
         writeZeroPage(raw, 0);
         writeZeroPage(raw, 1);
+        raw_mutex.unlock();
         writebackFileHeader();
     }
-    void File::writebackFileHeaderCore() {
+    void File::writebackFileHeaderCore(bool lock) {
         assert(raw);
+        if (lock)
+            raw_mutex.lock();
         raw.seekp(0);
         raw.write((const char*)&MagicNumber, 4);
         raw.write((const char*)&entryPageID, 2);
         raw.write((const char*)&eof.Page, 2);
         raw.write((const char*)&eof.Offset, 2);
+        if (lock)
+            raw_mutex.unlock();
     }
     void File::writebackFileHeader() {
-        writebackFileHeaderCore();
+        raw_mutex.lock();
+        writebackFileHeaderCore(false);
         unsigned short tmp;
         tmp = pageMap.size();
         raw.write((const char*)&tmp, 2);
@@ -77,8 +86,10 @@ namespace PageDB {
             raw.write((const char*)&item.first, 2);
             raw.write((const char*)&item.second, 2);
         }
+        raw_mutex.unlock();
     }
     void File::readFile() {
+        raw_mutex.lock();
         raw.seekg(0);
         int magic;
         unsigned short tmp = 0;
@@ -101,12 +112,15 @@ namespace PageDB {
             raw.read((char*)&paddr, 2);
             pageMap[vaddr] = paddr;
         }
+        raw_mutex.unlock();
     }
     File::File(const std::string& fn) : raw(fn, std::ios::in | std::ios::out | std::ios::binary) {
         if (!raw) {
+            raw_mutex.lock();
             raw.open(fn, std::ios::out | std::ios::binary | std::ios::trunc);
             raw.close();
             raw.open(fn, std::ios::in | std::ios::out | std::ios::binary);
+            raw_mutex.unlock();
             initFile();
         } else {
             readFile();
@@ -116,14 +130,18 @@ namespace PageDB {
         assert(raw);
         int offset = pageOffset(page_id);
         Page* ret = new Page;
+        raw_mutex.lock();
         raw.seekg(offset);
         raw.read(ret->buf, PAGE_SIZE);
+        raw_mutex.unlock();
         return ret;
     }
     void File::writePage(int page_id, Page* pg) {
         assert(raw);
         int offset = pageOffset(page_id);
+        raw_mutex.lock();
         raw.seekp(offset);
         raw.write(pg->buf, PAGE_SIZE);
+        raw_mutex.unlock();
     }
 }
