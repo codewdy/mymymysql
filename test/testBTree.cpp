@@ -5,19 +5,20 @@
 int main() {
     PageDB::Scheduler* pgdb = new PageDB::LRU_Scheduler;
     pgdb->StartSchedule();
-    std::string idx;
-    std::getline(std::cin, idx);
     BTree::BTree bt(pgdb, "testBTree.txt");
-    auto X = bt.find(idx);
-    auto Y = X.second;
-    Y.Page += 2;
-    Y.Offset += 1;
-    if (!X.first) {
-        Y.Page = 0;
-        Y.Offset = 0;
-        bt.set(idx, Y, true);
+    for (int i = 0; i < 10000; i++)
+        bt.set(std::to_string(i), BTree::Value(i * 2, i), true);
+    for (int i = 0; i < 10000; i++) {
+        std::cout << "tesing" << i << std::endl;
+        auto V = bt.find(std::to_string(i));
+        auto X = V.second;
+        if (!V.first)
+            std::cout << "ERROR!" << std::endl;
+        if (X.Page != i * 2)
+            std::cout << "ERROR!" << std::endl;
+        if (X.Offset != i)
+            std::cout << "ERROR!" << std::endl;
     }
-    std::cout << Y.Page << " " << Y.Offset << std::endl;
     pgdb->StopSchedule();
     delete pgdb;
 }

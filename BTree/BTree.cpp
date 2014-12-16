@@ -115,6 +115,7 @@ namespace BTree {
         bool found;
         PageDB::Location loc;
         trace(key, nullptr, found, loc);
+        ret.first = found;
         if (found) {
             PageDB::PageSession session = pgdb->GetSession(file, loc.Page);
             Information x;
@@ -198,7 +199,7 @@ namespace BTree {
     void BTree::insertCore(Key key, std::vector<int>& trace, PageDB::Location loc) {
         Node *currentNode = new Node, *splitNode = new Node;
         int sp = trace.size() - 1;
-        for(; sp > 0; sp--) {
+        for(; sp > -1; sp--) {
             PageDB::PageWriteSession session1 = pgdb->GetWriteSession(file, trace[sp]);
             currentNode->ReadFromBuf(session1.buf());
             bool split = currentNode->InsertAndSplit(key, loc, *splitNode);
