@@ -100,6 +100,16 @@ namespace BTree {
             Utils::writeWord(buf, value.Offset);
         }
     };
+
+
+
+    BTree::BTree(PageDB::Scheduler* _pgdb, const std::string& fn)
+        : pgdb(_pgdb), file(pgdb->OpenFile(fn)),
+        entrySession(pgdb->GetWriteSession(file, file->entryPageID)) {
+        if (magicNumber() != MagicNumber) {
+            initBTree();
+        }
+    }
     std::pair<bool, Value> BTree::find(const Key& key) {
         std::pair<bool, Value> ret;
         bool found;
@@ -152,6 +162,10 @@ namespace BTree {
                 tr->push_back(currentPage);
             PageDB::PageSession session = pgdb->GetSession(file, currentPage);
             node->ReadFromBuf(session.buf());
+            if (node->size == 0) {
+                found = false;
+                break;
+            }
             int idx = node->findIndex(key);
             auto locX = node->children[idx].loc;
             if (locX.Page != 0) {
@@ -168,6 +182,18 @@ namespace BTree {
             }
         }
         delete node;
+    }
+    void BTree::initBTree() {
+        magicNumber() = MagicNumber;
+        int rtPage = file->newPage();
+        int infoPage = file->newPage();
+        file->eof.Page = infoPage;
+        file->eof.Offset = 0;
+        file->writebackFileHeaderCore();
+        rootPage() = rtPage;
+        usedRecord() = 0;
+        avalibleRecord() = 0;
+        entrySession.flush();
     }
     void BTree::insertCore(Key key, std::vector<int>& trace, PageDB::Location loc) {
         Node *currentNode = new Node, *splitNode = new Node;

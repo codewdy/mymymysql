@@ -48,7 +48,9 @@ namespace BTree {
         BTreeIterator(PageDB::Scheduler* _pgdb, PageDB::File* _file);
         Value value();
     };
-    const int rootPageOffset = 0;
+    const int MagicNumber = 0x19940319;
+    const int MagicNumberOffset = 0;
+    const int rootPageOffset = MagicNumberOffset + 4;
     const int usedRecordOffset = rootPageOffset + 4;
     const int avaliableRecordOffset = usedRecordOffset + 4;
     struct BTree {
@@ -79,8 +81,12 @@ namespace BTree {
         bool set(const Key& key, Value value, bool force = false);
         bool remove(const Key& key);
         void trace(const Key& key, std::vector<int>* tr, bool& found, PageDB::Location& loc);
+        void initBTree();
         void insertCore(Key key, std::vector<int>& trace, PageDB::Location loc);
         void removeCore(Key key, std::vector<int>& trace);
+        int& magicNumber() {
+            return *(int*)(entrySession.page().buf + MagicNumberOffset);
+        }
         int& rootPage() {
             return *(int*)(entrySession.page().buf + rootPageOffset);
         }
