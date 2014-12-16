@@ -43,11 +43,15 @@ namespace BTree {
                 for (int i = 0; i < MinChild; i++)
                     splitNode.children[i] = children[i + MinChild];
                 if (key < splitNode.children[0].less)
-                    InsertAndSplit(key, loc, splitNode);
+                    Insert(key, loc);
                 else
-                    splitNode.InsertAndSplit(key, loc, splitNode);
+                    splitNode.Insert(key, loc);
                 return true;
             }
+            Insert(key, loc);
+            return false;
+        }
+        void Insert(Key key, PageDB::Location loc) {
             int i;
             for (i = size; i > 0; i--) {
                 if (key < children[i - 1].less)
@@ -58,7 +62,20 @@ namespace BTree {
             children[i].less = key;
             children[i].loc = loc;
             size++;
-            return false;
+        }
+        void Remove(Key key) {
+            int p;
+            for (int p = 0; p < size; p++)
+                if (children[p].less == key)
+                    break;
+            size--;
+            for (int i = p; i < size; i++)
+                children[i] = children[i + 1];
+        }
+        void Merge(const Node& right) {
+            for (int i = 0; i < right.size; i++)
+                children[size + i] = right.children[i];
+            size += right.size;
         }
         void ReadFromBuf(const char* buf) {
             size = Utils::readInt(buf);
@@ -229,7 +246,75 @@ namespace BTree {
         delete splitNode;
     }
     void BTree::removeCore(Key key, std::vector<int>& trace) {
-        //TODO
-        throw "Not Imp";
+        Node *parent = new Node, *child = new Node, *sibling = new Node;
+        PageDB::PageWriteSession parentSession = pgdb->GetWriteSession(file, trace.back());
+        parent->ReadFromBuf(parentSession.buf());
+        int sp;
+        for (sp = trace.size() - 1; sp > 0; sp--) {
+            std::swap(parent, child);
+            child->Remove(key);
+            PageDB::PageWriteSession childSession = std::move(parentSession);
+            if (child->size >= MinChild) {
+                child->WriteToBuf(childSession.buf());
+                break;
+            }
+            parentSession = pgdb->GetWriteSession(file, trace[sp - 1]);
+            parent->ReadFromBuf(parentSession.buf());
+            int idx = parent->findIndex(child->children[0].less);
+            if (idx > 0) {
+                //Left
+                PageDB::PageWriteSession siblingSession = pgdb->GetWriteSession(file, parent->children[idx - 1].loc.Offset);
+                sibling->ReadFromBuf(siblingSession.buf());
+                if (sibling->size > MinChild) {
+                    auto item = sibling->children[sibling->size - 1];
+                    child->Insert(item.less, item.loc);
+                    sibling->Remove(item.less);
+                    parent->children[idx].less = child->children[0].less;
+                    sibling->WriteToBuf(siblingSession.buf());
+                    child->WriteToBuf(childSession.buf());
+                    parent->WriteToBuf(parentSession.buf());
+                    break;
+                }
+                //Merge
+                childSession.Release();
+                file->removePage(trace[sp]);
+                sibling->Merge(*child);
+                sibling->WriteToBuf(siblingSession.buf());
+                key = child->children[0].less;
+            } else {
+                //Right
+                PageDB::PageWriteSession siblingSession = pgdb->GetWriteSession(file, parent->children[idx + 1].loc.Offset);
+                sibling->ReadFromBuf(siblingSession.buf());
+                if (sibling->size > MinChild) {
+                    auto item = sibling->children[0];
+                    child->Insert(item.less, item.loc);
+                    sibling->Remove(item.less);
+                    parent->children[idx + 1].less = sibling->children[0].less;
+                    sibling->WriteToBuf(siblingSession.buf());
+                    child->WriteToBuf(childSession.buf());
+                    parent->WriteToBuf(parentSession.buf());
+                    break;
+                }
+                //Merge
+                siblingSession.Release();
+                file->removePage(parent->children[idx + 1].loc.Offset);
+                child->Merge(*sibling);
+                child->WriteToBuf(childSession.buf());
+                key = sibling->children[0].less;
+            }
+        }
+        if (sp == 0) {
+            parent->Remove(key);
+            if (parent->size == 1 && parent->children[0].loc.Page == 0) {
+                parentSession.Release();
+                rootPage() = parent->children[0].loc.Offset;
+                entrySession.flush();
+            } else {
+                parent->WriteToBuf(parentSession.buf());
+            }
+        }
+        delete parent;
+        delete child;
+        delete sibling;
     }
 }

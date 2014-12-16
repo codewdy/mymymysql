@@ -29,6 +29,7 @@ namespace PageDB {
         std::unordered_map<int, int> pageMap;
         int pageOffset(int vaddr);
         int newPage();
+        void removePage(int pageid);
         void writebackFileHeaderCore();
         void writebackFileHeader();
         File(const std::string&);

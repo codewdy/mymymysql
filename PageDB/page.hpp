@@ -118,9 +118,12 @@ namespace PageDB {
             if (desc)
                 desc->incRef();
         }
-        ~PageWriteSession() {
+        void Release() {
             decRef();
             desc = nullptr;
+        }
+        ~PageWriteSession() {
+            Release();
         }
         Page& page() {
             return *(desc->page);
