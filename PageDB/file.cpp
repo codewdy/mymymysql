@@ -42,6 +42,14 @@ namespace PageDB {
         writebackFileHeader();
         return vaddr;
     }
+    void File::removePage(int pageid) {
+        std::size_t count = pageMap.erase(pageid);
+        if (count == 0) {
+            //TODO
+            throw "Not Imp";
+        }
+        writebackFileHeader();
+    }
     void File::initFile() {
         entryPageID = 0;
         eof.Page = 0;
