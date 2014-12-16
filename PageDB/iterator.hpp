@@ -74,16 +74,16 @@ namespace PageDB {
             return Get()[idx];
         }
     };
-    bool operator==(const Iterator& lhs, const Iterator& rhs) {
+    inline bool operator==(const Iterator& lhs, const Iterator& rhs) {
         return lhs.file == rhs.file && lhs.pageid == rhs.pageid && lhs.offset == rhs.offset;
     }
-    bool operator!=(const Iterator& lhs, const Iterator& rhs) {
+    inline bool operator!=(const Iterator& lhs, const Iterator& rhs) {
         return !(lhs == rhs);
     }
-    bool operator==(const ConstIterator& lhs, const ConstIterator& rhs) {
+    inline bool operator==(const ConstIterator& lhs, const ConstIterator& rhs) {
         return lhs.file == rhs.file && lhs.pageid == rhs.pageid && lhs.offset == rhs.offset;
     }
-    bool operator!=(const ConstIterator& lhs, const ConstIterator& rhs) {
+    inline bool operator!=(const ConstIterator& lhs, const ConstIterator& rhs) {
         return !(lhs == rhs);
     }
 }
