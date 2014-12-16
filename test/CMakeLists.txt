@@ -1,2 +1,5 @@
 ADD_EXECUTABLE(testPageDB testPageDB.cpp)
 TARGET_LINK_LIBRARIES(testPageDB PageDB)
+
+ADD_EXECUTABLE(testBTree testBTree.cpp)
+TARGET_LINK_LIBRARIES(testBTree BTree PageDB)
