@@ -3,14 +3,16 @@
 
 #include "PageDB/scheduler.hpp"
 #include "PageDB/iterator.hpp"
+#include <vector>
 
 namespace BTree {
-    typedef std::pair<int, int> ValueType;
+    typedef PageDB::Location Value;
     struct Key {
         int hash1, hash2, hash3;
         Key(const std::string& _key);
         Key(int _key);
         Key(int _hash1, int _hash2, int _hash3);
+        Key(){}
     };
     bool operator<(const Key& lhs, const Key& rhs) {
         if (lhs.hash1 == rhs.hash1 && lhs.hash2 == rhs.hash2)
@@ -38,26 +40,32 @@ namespace BTree {
         //TODO
         BTreeConstIterator(PageDB::Scheduler* _pgdb, const std::string& fn);
         BTreeConstIterator(PageDB::Scheduler* _pgdb, PageDB::File* _file);
-        ValueType value();
+        Value value();
     };
     struct BTreeIterator : public PageDB::Iterator {
         //TODO
         BTreeIterator(PageDB::Scheduler* _pgdb, const std::string& fn);
         BTreeIterator(PageDB::Scheduler* _pgdb, PageDB::File* _file);
-        ValueType value();
+        Value value();
     };
+    const int rootPageOffset = 0;
+    const int usedRecordOffset = rootPageOffset + 4;
+    const int avaliableRecordOffset = usedRecordOffset + 4;
     struct BTree {
-        BTree(PageDB::Scheduler* pgdb, const std::string& fn);
-        std::pair<bool, ValueType> find(int key) {
+        PageDB::Scheduler* pgdb;
+        PageDB::File* file;
+        PageDB::PageWriteSession entrySession;
+        BTree(PageDB::Scheduler* _pgdb, const std::string& fn);
+        std::pair<bool, Value> find(int key) {
             return find(Key(key));
         }
-        std::pair<bool, ValueType> find(const std::string& key) {
+        std::pair<bool, Value> find(const std::string& key) {
             return find(Key(key));
         }
-        bool set(int key, ValueType value, bool force = false) {
+        bool set(int key, Value value, bool force = false) {
             return set(Key(key), value, force);
         }
-        bool set(const std::string& key, ValueType value, bool force = false) {
+        bool set(const std::string& key, Value value, bool force = false) {
             return set(Key(key), value, force);
         }
         bool remove(int key) {
@@ -67,10 +75,21 @@ namespace BTree {
             return remove(Key(key));
         }
     private:
-        std::pair<bool, ValueType> find(const Key& key);
-        bool set(const Key& key, ValueType value, bool force = false);
+        std::pair<bool, Value> find(const Key& key);
+        bool set(const Key& key, Value value, bool force = false);
         bool remove(const Key& key);
+        void trace(const Key& key, std::vector<int>* tr, bool& found, PageDB::Location& loc);
+        void insertCore(Key key, std::vector<int>& trace, PageDB::Location loc);
+        void removeCore(Key key, std::vector<int>& trace);
+        int& rootPage() {
+            return *(int*)(entrySession.page().buf + rootPageOffset);
+        }
+        int& usedRecord() {
+            return *(int*)(entrySession.page().buf + usedRecordOffset);
+        }
+        int& avalibleRecord() {
+            return *(int*)(entrySession.page().buf + avaliableRecordOffset);
+        }
     };
 }
-
 #endif
