@@ -18,7 +18,7 @@ namespace BTree {
     }
     Key::Key(int _hash1, int _hash2, int _hash3) :
         hash1(_hash1), hash2(_hash2), hash3(_hash3) {}
-    const int MinChild = 255;
+    const int MinChild = PageDB::PAGE_SIZE / 16 / 2 - 1;
     struct Node {
         int size;
         struct Child {
@@ -63,11 +63,8 @@ namespace BTree {
             children[i].loc = loc;
             size++;
         }
-        void Remove(Key key) {
-            int p;
-            for (p = 0; p < size; p++)
-                if (children[p].less == key)
-                    break;
+        void Remove(int idx) {
+            int p = idx;
             size--;
             for (int i = p; i < size; i++)
                 children[i] = children[i + 1];
@@ -79,23 +76,13 @@ namespace BTree {
         }
         void ReadFromBuf(const char* buf) {
             size = Utils::readInt(buf);
-            for (int i = 0; i < size; i++) {
-                children[i].less.hash1 = Utils::readInt(buf);
-                children[i].less.hash2 = Utils::readInt(buf);
-                children[i].less.hash3 = Utils::readInt(buf);
-                children[i].loc.Page = Utils::readWord(buf);
-                children[i].loc.Offset = Utils::readWord(buf);
-            }
+            int recSize = size * sizeof(Child);
+            memcpy(children, buf, recSize);
         }
         void WriteToBuf(char* buf) {
             Utils::writeInt(buf, size);
-            for (int i = 0; i < size; i++) {
-                Utils::writeInt(buf, children[i].less.hash1);
-                Utils::writeInt(buf, children[i].less.hash2);
-                Utils::writeInt(buf, children[i].less.hash3);
-                Utils::writeWord(buf, children[i].loc.Page);
-                Utils::writeWord(buf, children[i].loc.Offset);
-            }
+            int recSize = size * sizeof(Child);
+            memcpy(buf, children, recSize);
         }
     };
     const int InformationLength = 16;
@@ -103,18 +90,10 @@ namespace BTree {
         Key key;
         Value value;
         void ReadFromBuf(const char* buf) {
-            key.hash1 = Utils::readInt(buf);
-            key.hash2 = Utils::readInt(buf);
-            key.hash3 = Utils::readInt(buf);
-            value.Page = Utils::readWord(buf);
-            value.Offset = Utils::readWord(buf);
+            memcpy(this, buf, sizeof(*this));
         }
         void WriteToBuf(char* buf) {
-            Utils::writeInt(buf, key.hash1);
-            Utils::writeInt(buf, key.hash2);
-            Utils::writeInt(buf, key.hash3);
-            Utils::writeWord(buf, value.Page);
-            Utils::writeWord(buf, value.Offset);
+            memcpy(buf, this, sizeof(*this));
         }
     };
 
@@ -250,9 +229,10 @@ namespace BTree {
         PageDB::PageWriteSession parentSession = pgdb->GetWriteSession(file, trace.back());
         parent->ReadFromBuf(parentSession.buf());
         int sp;
+        int idx = parent->findIndex(key);
         for (sp = trace.size() - 1; sp > 0; sp--) {
             std::swap(parent, child);
-            child->Remove(key);
+            child->Remove(idx);
             PageDB::PageWriteSession childSession = std::move(parentSession);
             if (child->size >= MinChild) {
                 child->WriteToBuf(childSession.buf());
@@ -260,7 +240,7 @@ namespace BTree {
             }
             parentSession = pgdb->GetWriteSession(file, trace[sp - 1]);
             parent->ReadFromBuf(parentSession.buf());
-            int idx = parent->findIndex(child->children[0].less);
+            idx = parent->findIndex(child->children[0].less);
             if (idx > 0) {
                 //Left
                 PageDB::PageWriteSession siblingSession = pgdb->GetWriteSession(file, parent->children[idx - 1].loc.Offset);
@@ -268,7 +248,7 @@ namespace BTree {
                 if (sibling->size > MinChild) {
                     auto item = sibling->children[sibling->size - 1];
                     child->Insert(item.less, item.loc);
-                    sibling->Remove(item.less);
+                    sibling->Remove(sibling->size - 1);
                     parent->children[idx].less = child->children[0].less;
                     sibling->WriteToBuf(siblingSession.buf());
                     child->WriteToBuf(childSession.buf());
@@ -280,7 +260,6 @@ namespace BTree {
                 pgdb->RemovePage(file, trace[sp]);
                 sibling->Merge(*child);
                 sibling->WriteToBuf(siblingSession.buf());
-                key = child->children[0].less;
             } else {
                 //Right
                 PageDB::PageWriteSession siblingSession = pgdb->GetWriteSession(file, parent->children[idx + 1].loc.Offset);
@@ -288,7 +267,7 @@ namespace BTree {
                 if (sibling->size > MinChild) {
                     auto item = sibling->children[0];
                     child->Insert(item.less, item.loc);
-                    sibling->Remove(item.less);
+                    sibling->Remove(0);
                     parent->children[idx + 1].less = sibling->children[0].less;
                     sibling->WriteToBuf(siblingSession.buf());
                     child->WriteToBuf(childSession.buf());
@@ -300,11 +279,11 @@ namespace BTree {
                 pgdb->RemovePage(file, parent->children[idx + 1].loc.Offset);
                 child->Merge(*sibling);
                 child->WriteToBuf(childSession.buf());
-                key = sibling->children[0].less;
+                idx++;
             }
         }
         if (sp == 0) {
-            parent->Remove(key);
+            parent->Remove(idx);
             if (parent->size == 1 && parent->children[0].loc.Page == 0) {
                 parentSession.Release();
                 rootPage() = parent->children[0].loc.Offset;
