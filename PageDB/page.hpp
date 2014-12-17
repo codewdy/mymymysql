@@ -1,6 +1,7 @@
 #ifndef WDY_8320182910_PAGE
 #define WDY_8320182910_PAGE
 #include "file.hpp"
+#include <mutex>
 
 namespace PageDB {
     struct Page {
@@ -11,20 +12,25 @@ namespace PageDB {
         File* file;
         int page_id;
         Page* page;
+        std::mutex ref_mutex;
         int ref;
         bool dirty;
         PageDesc(File* _file, int _page_id)
             : file(_file), page_id(_page_id),
-            page(nullptr), ref(0), dirty(false)
+            page(nullptr), ref_mutex(), ref(0), dirty(false)
         {}
         void incRef() {
+            ref_mutex.lock();
             ref++;
             if (page == nullptr) {
                 page = file->loadPage(page_id);
             }
+            ref_mutex.unlock();
         }
         void decRef() {
+            ref_mutex.lock();
             ref--;
+            ref_mutex.unlock();
         }
         void write() {
             dirty = true;
@@ -35,10 +41,18 @@ namespace PageDB {
                 file->writePage(page_id, page);
             }
         }
-        void Release() {
+        void Release(bool force = true) {
+            if (force) {
+                ref_mutex.lock();
+            } else {
+                if (!ref_mutex.try_lock()) {
+                    return;
+                }
+            }
             WriteBack();
             delete page;
             page = nullptr;
+            ref_mutex.unlock();
         }
         ~PageDesc() {
             Release();

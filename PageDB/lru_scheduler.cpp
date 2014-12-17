@@ -12,7 +12,7 @@ namespace PageDB {
                 if (count) {
                     count--;
                 } else {
-                    desc->Release();
+                    desc->Release(false);
                 }
             }
         }
