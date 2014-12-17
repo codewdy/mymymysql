@@ -209,25 +209,25 @@ namespace BTree {
         }
     }
     void BTree::removeCore(Key key, std::vector<int>& trace) {
-        Node *parent, *child, *sibling;
+        Node *parent;
         PageDB::PageWriteSession parentSession = pgdb->GetWriteSession(file, trace.back());
         parent = reinterpret_cast<Node*>(parentSession.buf());
         int sp;
         int idx = parent->findIndex(key);
         for (sp = trace.size() - 1; sp > 0; sp--) {
-            std::swap(parent, child);
+            Node* child = parent;
             child->Remove(idx);
-            PageDB::PageWriteSession childSession = std::move(parentSession);
             if (child->size >= MinChild) {
                 break;
             }
+            PageDB::PageWriteSession childSession = std::move(parentSession);
             parentSession = pgdb->GetWriteSession(file, trace[sp - 1]);
             parent = reinterpret_cast<Node*>(parentSession.buf());
             idx = parent->findIndex(child->children[0].less);
             if (idx > 0) {
                 //Left
                 PageDB::PageWriteSession siblingSession = pgdb->GetWriteSession(file, parent->children[idx - 1].loc.Offset);
-                sibling = reinterpret_cast<Node*>(siblingSession.buf());
+                Node* sibling = reinterpret_cast<Node*>(siblingSession.buf());
                 if (sibling->size > MinChild) {
                     auto item = sibling->children[sibling->size - 1];
                     child->Insert(item.less, item.loc);
@@ -236,13 +236,13 @@ namespace BTree {
                     break;
                 }
                 //Merge
+                sibling->Merge(*child);
                 childSession.Release();
                 pgdb->RemovePage(file, trace[sp]);
-                sibling->Merge(*child);
             } else {
                 //Right
                 PageDB::PageWriteSession siblingSession = pgdb->GetWriteSession(file, parent->children[idx + 1].loc.Offset);
-                sibling = reinterpret_cast<Node*>(siblingSession.buf());
+                Node* sibling = reinterpret_cast<Node*>(siblingSession.buf());
                 if (sibling->size > MinChild) {
                     auto item = sibling->children[0];
                     child->Insert(item.less, item.loc);
@@ -251,9 +251,9 @@ namespace BTree {
                     break;
                 }
                 //Merge
+                child->Merge(*sibling);
                 siblingSession.Release();
                 pgdb->RemovePage(file, parent->children[idx + 1].loc.Offset);
-                child->Merge(*sibling);
                 idx++;
             }
         }
