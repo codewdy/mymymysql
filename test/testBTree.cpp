@@ -2,9 +2,7 @@
 #include "PageDB/lru_scheduler.hpp"
 #include <iostream>
 
-int main() {
-    PageDB::Scheduler* pgdb = new PageDB::LRU_Scheduler;
-    pgdb->StartSchedule();
+void test(PageDB::Scheduler* pgdb) {
     BTree::BTree bt(pgdb, "testBTree.txt");
     bt.set("test", BTree::Value(0, 0), true);
     bt.remove("test");
@@ -14,16 +12,22 @@ int main() {
     for (int i = 0; i < 10000; i++)
         bt.set(std::to_string(i), BTree::Value(i * 2, i), true);
     for (int i = 0; i < 10000; i++) {
-        std::cout << "tesing" << i << std::endl;
+        //std::cout << "tesing" << i << std::endl;
         auto V = bt.find(std::to_string(i));
         auto X = V.second;
         if (!V.first)
-            std::cout << "ERROR!" << std::endl;
+            std::cout << "ERROR1!" << i << std::endl;
         if (X.Page != i * 2)
-            std::cout << "ERROR!" << std::endl;
+            std::cout << "ERROR2!" << i << std::endl;
         if (X.Offset != i)
-            std::cout << "ERROR!" << std::endl;
+            std::cout << "ERROR3!" << i << std::endl;
     }
+}
+
+int main() {
+    PageDB::Scheduler* pgdb = new PageDB::LRU_Scheduler;
+    pgdb->StartSchedule();
+    test(pgdb);
     pgdb->StopSchedule();
     delete pgdb;
 }

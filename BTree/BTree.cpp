@@ -65,7 +65,7 @@ namespace BTree {
         }
         void Remove(Key key) {
             int p;
-            for (int p = 0; p < size; p++)
+            for (p = 0; p < size; p++)
                 if (children[p].less == key)
                     break;
             size--;
