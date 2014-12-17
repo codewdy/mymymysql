@@ -37,6 +37,13 @@ namespace PageDB {
         }
         return desc;
     }
+    void Scheduler::RemovePage(File* file, int page_id) {
+        PageDesc*& desc = pageIndex[std::make_pair(file, page_id)];
+        if (desc) {
+            desc->Remove();
+        }
+        file->removePage(page_id);
+    }
     PageSession Scheduler::GetSession(File* file, int page_id) {
         return PageSession(GetPage(file, page_id));
     }

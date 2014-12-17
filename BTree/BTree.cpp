@@ -277,7 +277,7 @@ namespace BTree {
                 }
                 //Merge
                 childSession.Release();
-                file->removePage(trace[sp]);
+                pgdb->RemovePage(file, trace[sp]);
                 sibling->Merge(*child);
                 sibling->WriteToBuf(siblingSession.buf());
                 key = child->children[0].less;
@@ -297,7 +297,7 @@ namespace BTree {
                 }
                 //Merge
                 siblingSession.Release();
-                file->removePage(parent->children[idx + 1].loc.Offset);
+                pgdb->RemovePage(file, parent->children[idx + 1].loc.Offset);
                 child->Merge(*sibling);
                 child->WriteToBuf(childSession.buf());
                 key = sibling->children[0].less;

@@ -57,6 +57,14 @@ namespace PageDB {
         ~PageDesc() {
             Release();
         }
+        void Remove() {
+            ref_mutex.lock();
+            dirty = false;
+            ref = 0;
+            delete page;
+            page = nullptr;
+            ref_mutex.unlock();
+        }
     };
 
     struct PageSession {
