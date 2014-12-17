@@ -49,9 +49,11 @@ namespace PageDB {
                     return;
                 }
             }
-            WriteBack();
-            delete page;
-            page = nullptr;
+            if (force || ref == 0) {
+                WriteBack();
+                delete page;
+                page = nullptr;
+            }
             ref_mutex.unlock();
         }
         ~PageDesc() {
