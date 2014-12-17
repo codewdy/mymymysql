@@ -6,8 +6,9 @@ namespace PageDB {
             PageDesc* desc = iter->second;
             desc->WriteBack();
             int& count = lruIndex[desc];
-            if (desc->ref) {
+            if (desc->used) {
                 count++;
+                desc->used = desc->ref;
             } else {
                 if (count) {
                     count--;

@@ -15,11 +15,13 @@ namespace PageDB {
         std::mutex ref_mutex;
         int ref;
         bool dirty;
+        bool used;
         PageDesc(File* _file, int _page_id)
             : file(_file), page_id(_page_id),
-            page(nullptr), ref_mutex(), ref(0), dirty(false)
+            page(nullptr), ref_mutex(), ref(0), dirty(false), used(false)
         {}
         void incRef() {
+            used = true;
             ref_mutex.lock();
             ref++;
             if (page == nullptr) {
