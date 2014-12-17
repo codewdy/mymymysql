@@ -74,27 +74,11 @@ namespace BTree {
                 children[size + i] = right.children[i];
             size += right.size;
         }
-        void ReadFromBuf(const char* buf) {
-            size = Utils::readInt(buf);
-            int recSize = size * sizeof(Child);
-            memcpy(children, buf, recSize);
-        }
-        void WriteToBuf(char* buf) {
-            Utils::writeInt(buf, size);
-            int recSize = size * sizeof(Child);
-            memcpy(buf, children, recSize);
-        }
     };
     const int InformationLength = 16;
     struct Information {
         Key key;
         Value value;
-        void ReadFromBuf(const char* buf) {
-            memcpy(this, buf, sizeof(*this));
-        }
-        void WriteToBuf(char* buf) {
-            memcpy(buf, this, sizeof(*this));
-        }
     };
 
 
@@ -114,9 +98,9 @@ namespace BTree {
         ret.first = found;
         if (found) {
             PageDB::PageSession session = pgdb->GetSession(file, loc.Page);
-            Information x;
-            x.ReadFromBuf(session.buf() + loc.Offset);
-            ret.second = x.value;
+            const Information* x;
+            x = reinterpret_cast<const Information*>(session.buf() + loc.Offset);
+            ret.second = x->value;
         }
         return ret;
     }
@@ -127,16 +111,18 @@ namespace BTree {
         trace(key, &tr, found, loc);
         if (!found && !force)
             return false;
-        Information info;
-        info.key = key;
-        info.value = value;
+        Information* info;
         if (found) {
             PageDB::PageWriteSession session = pgdb->GetWriteSession(file, loc.Page);
-            info.WriteToBuf(session.buf() + loc.Offset);
+            info = reinterpret_cast<Information*>(session.buf() + loc.Offset);
+            info->key = key;
+            info->value = value;
             return true;
         }
         char buf[InformationLength];
-        info.WriteToBuf(buf);
+        info = reinterpret_cast<Information*>(buf);
+        info->key = key;
+        info->value = value;
         auto locX = Utils::writeFile(pgdb, file, buf, InformationLength);
         insertCore(key, tr, locX);
         return true;
@@ -152,13 +138,13 @@ namespace BTree {
         return true;
     }
     void BTree::trace(const Key& key, std::vector<int>* tr, bool& found, PageDB::Location& loc) {
-        Node* node = new Node;
+        const Node* node;
         int currentPage = rootPage();
         while (true) {
             if (tr)
                 tr->push_back(currentPage);
             PageDB::PageSession session = pgdb->GetSession(file, currentPage);
-            node->ReadFromBuf(session.buf());
+            node = reinterpret_cast<const Node*>(session.buf());
             if (node->size == 0) {
                 found = false;
                 break;
@@ -178,7 +164,6 @@ namespace BTree {
                 currentPage = locX.Offset;
             }
         }
-        delete node;
     }
     void BTree::initBTree() {
         magicNumber() = MagicNumber;
@@ -193,41 +178,40 @@ namespace BTree {
         entrySession.flush();
     }
     void BTree::insertCore(Key key, std::vector<int>& trace, PageDB::Location loc) {
-        Node *currentNode = new Node, *splitNode = new Node;
+        Node *currentNode, *splitNode;
         int sp = trace.size() - 1;
         for(; sp > -1; sp--) {
             PageDB::PageWriteSession session1 = pgdb->GetWriteSession(file, trace[sp]);
-            currentNode->ReadFromBuf(session1.buf());
-            bool split = currentNode->InsertAndSplit(key, loc, *splitNode);
-            currentNode->WriteToBuf(session1.buf());
-            if (!split)
+            currentNode = reinterpret_cast<Node*>(session1.buf());
+            if (currentNode->size != MinChild * 2) {
+                currentNode->Insert(key, loc);
                 break;
+            }
             int newPage = file->newPage();
             PageDB::PageWriteSession session2 = pgdb->GetWriteSession(file, newPage);
-            splitNode->WriteToBuf(session2.buf());
+            splitNode = reinterpret_cast<Node*>(session2.buf());
+            currentNode->InsertAndSplit(key, loc, *splitNode);
             loc.Page = 0;
             loc.Offset = newPage;
             key = splitNode->children[0].less;
         }
         if (sp == -1) {
+            int newPage = file->newPage();
+            PageDB::PageWriteSession session = pgdb->GetWriteSession(file, newPage);
+            currentNode = reinterpret_cast<Node*>(session.buf());
             currentNode->size = 2;
             currentNode->children[0].less = Key(INT_MIN, INT_MIN, INT_MIN);
             currentNode->children[0].loc = PageDB::Location(0, trace[0]);
             currentNode->children[1].less = key;
             currentNode->children[1].loc = loc;
-            int newPage = file->newPage();
-            PageDB::PageWriteSession session = pgdb->GetWriteSession(file, newPage);
-            currentNode->WriteToBuf(session.buf());
             rootPage() = newPage;
             entrySession.flush();
         }
-        delete currentNode;
-        delete splitNode;
     }
     void BTree::removeCore(Key key, std::vector<int>& trace) {
-        Node *parent = new Node, *child = new Node, *sibling = new Node;
+        Node *parent, *child, *sibling;
         PageDB::PageWriteSession parentSession = pgdb->GetWriteSession(file, trace.back());
-        parent->ReadFromBuf(parentSession.buf());
+        parent = reinterpret_cast<Node*>(parentSession.buf());
         int sp;
         int idx = parent->findIndex(key);
         for (sp = trace.size() - 1; sp > 0; sp--) {
@@ -235,65 +219,51 @@ namespace BTree {
             child->Remove(idx);
             PageDB::PageWriteSession childSession = std::move(parentSession);
             if (child->size >= MinChild) {
-                child->WriteToBuf(childSession.buf());
                 break;
             }
             parentSession = pgdb->GetWriteSession(file, trace[sp - 1]);
-            parent->ReadFromBuf(parentSession.buf());
+            parent = reinterpret_cast<Node*>(parentSession.buf());
             idx = parent->findIndex(child->children[0].less);
             if (idx > 0) {
                 //Left
                 PageDB::PageWriteSession siblingSession = pgdb->GetWriteSession(file, parent->children[idx - 1].loc.Offset);
-                sibling->ReadFromBuf(siblingSession.buf());
+                sibling = reinterpret_cast<Node*>(siblingSession.buf());
                 if (sibling->size > MinChild) {
                     auto item = sibling->children[sibling->size - 1];
                     child->Insert(item.less, item.loc);
                     sibling->Remove(sibling->size - 1);
                     parent->children[idx].less = child->children[0].less;
-                    sibling->WriteToBuf(siblingSession.buf());
-                    child->WriteToBuf(childSession.buf());
-                    parent->WriteToBuf(parentSession.buf());
                     break;
                 }
                 //Merge
                 childSession.Release();
                 pgdb->RemovePage(file, trace[sp]);
                 sibling->Merge(*child);
-                sibling->WriteToBuf(siblingSession.buf());
             } else {
                 //Right
                 PageDB::PageWriteSession siblingSession = pgdb->GetWriteSession(file, parent->children[idx + 1].loc.Offset);
-                sibling->ReadFromBuf(siblingSession.buf());
+                sibling = reinterpret_cast<Node*>(siblingSession.buf());
                 if (sibling->size > MinChild) {
                     auto item = sibling->children[0];
                     child->Insert(item.less, item.loc);
                     sibling->Remove(0);
                     parent->children[idx + 1].less = sibling->children[0].less;
-                    sibling->WriteToBuf(siblingSession.buf());
-                    child->WriteToBuf(childSession.buf());
-                    parent->WriteToBuf(parentSession.buf());
                     break;
                 }
                 //Merge
                 siblingSession.Release();
                 pgdb->RemovePage(file, parent->children[idx + 1].loc.Offset);
                 child->Merge(*sibling);
-                child->WriteToBuf(childSession.buf());
                 idx++;
             }
         }
         if (sp == 0) {
             parent->Remove(idx);
             if (parent->size == 1 && parent->children[0].loc.Page == 0) {
-                parentSession.Release();
                 rootPage() = parent->children[0].loc.Offset;
+                parentSession.Release();
                 entrySession.flush();
-            } else {
-                parent->WriteToBuf(parentSession.buf());
             }
         }
-        delete parent;
-        delete child;
-        delete sibling;
     }
 }
