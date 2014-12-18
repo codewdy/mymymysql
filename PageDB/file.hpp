@@ -13,6 +13,12 @@ namespace PageDB {
         Location(unsigned short _Page, unsigned short _Offset)
             : Page(_Page), Offset(_Offset) {}
     };
+    inline bool operator==(Location lhs, Location rhs) {
+        return lhs.Page == rhs.Page && lhs.Offset == rhs.Offset;
+    }
+    inline bool operator!=(Location lhs, Location rhs) {
+        return !(lhs == rhs);
+    }
     struct Page;
     const int PAGE_SIZE = 8192;
     const int MaxPage = 2045;

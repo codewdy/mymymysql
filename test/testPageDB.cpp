@@ -3,8 +3,8 @@
 #include <iostream>
 
 void test(PageDB::Scheduler* pgdb) {
-    PageDB::Iterator X(pgdb, "testPageDB.txt");
-    PageDB::ConstIterator Y(pgdb, "testPageDB.txt");
+    PageDB::Iterator X(pgdb, pgdb->OpenFile("testPageDB.txt"));
+    PageDB::ConstIterator Y(pgdb, pgdb->OpenFile("testPageDB.txt"));
     int newPage = X.file->newPage();
     Y.Goto(newPage - 1, 0);
     int ans = Y[0];

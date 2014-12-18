@@ -7,29 +7,27 @@ namespace PageDB {
     struct Iterator {
         Scheduler* pgdb;
         File* file;
-        int pageid, offset;
+        PageDB::Location loc;
         PageWriteSession session;
-        Iterator(Scheduler* _pgdb, const std::string& fn, int _pageid = -1, int _offset = 0)
-            : pgdb(_pgdb), file(pgdb->OpenFile(fn)),
-            pageid(_pageid), offset(_offset), session(pgdb->GetWriteSession(file, pageid))
-        {}
         Iterator(Scheduler* _pgdb, File* _file, int _pageid = -1, int _offset = 0)
             : pgdb(_pgdb), file(_file),
-            pageid(_pageid), offset(_offset), session(pgdb->GetWriteSession(file, pageid))
+            loc(_pageid, _offset), session(pgdb->GetWriteSession(file, _pageid))
         {}
-        void Goto(int _pageid, int _offset) {
-            if (pageid != _pageid) {
-                pageid = _pageid;
-                session = pgdb->GetWriteSession(file, pageid);
+        void Goto(unsigned short page, unsigned short offset) {
+            Goto(PageDB::Location(page, offset));
+        }
+        void Goto(Location _loc) {
+            if (loc.Page != _loc.Page) {
+                session = pgdb->GetWriteSession(file, _loc.Page);
             }
-            offset = _offset;
+            loc = _loc;
         }
         char* Get() {
-            return session.buf() + offset;
+            return session.buf() + loc.Offset;
         }
         void Next() {
             auto nxt = NextLocation();
-            Goto(nxt.Page, nxt.Offset);
+            Goto(nxt);
         }
         virtual Location NextLocation() {
             //TODO: Not Imp
@@ -42,29 +40,27 @@ namespace PageDB {
     struct ConstIterator {
         Scheduler* pgdb;
         File* file;
-        int pageid, offset;
+        Location loc;
         PageSession session;
-        ConstIterator(Scheduler* _pgdb, const std::string& fn, int _pageid = -1, int _offset = 0)
-            : pgdb(_pgdb), file(pgdb->OpenFile(fn)),
-            pageid(_pageid), offset(_offset), session(pgdb->GetSession(file, pageid))
-        {}
         ConstIterator(Scheduler* _pgdb, File* _file, int _pageid = -1, int _offset = 0)
             : pgdb(_pgdb), file(_file),
-            pageid(_pageid), offset(_offset), session(pgdb->GetSession(file, pageid))
+            loc(_pageid, _offset), session(pgdb->GetSession(file, _pageid))
         {}
-        void Goto(int _pageid, int _offset) {
-            if (pageid != _pageid) {
-                pageid = _pageid;
-                session = pgdb->GetSession(file, pageid);
+        void Goto(unsigned short page, unsigned short offset) {
+            Goto(PageDB::Location(page, offset));
+        }
+        void Goto(Location _loc) {
+            if (loc.Page != _loc.Page) {
+                session = pgdb->GetSession(file, _loc.Page);
             }
-            offset = _offset;
+            loc = _loc;
         }
         const char* Get() {
-            return session.buf() + offset;
+            return session.buf() + loc.Offset;
         }
         void Next() {
             auto nxt = NextLocation();
-            Goto(nxt.Page, nxt.Offset);
+            Goto(nxt);
         }
         virtual Location NextLocation() {
             //TODO: Not Imp
@@ -75,25 +71,25 @@ namespace PageDB {
         }
     };
     inline bool operator==(const Iterator& lhs, const Iterator& rhs) {
-        return lhs.file == rhs.file && lhs.pageid == rhs.pageid && lhs.offset == rhs.offset;
+        return lhs.file == rhs.file && lhs.loc == rhs.loc;
     }
     inline bool operator!=(const Iterator& lhs, const Iterator& rhs) {
         return !(lhs == rhs);
     }
     inline bool operator==(const ConstIterator& lhs, const ConstIterator& rhs) {
-        return lhs.file == rhs.file && lhs.pageid == rhs.pageid && lhs.offset == rhs.offset;
+        return lhs.file == rhs.file && lhs.loc == rhs.loc;
     }
     inline bool operator!=(const ConstIterator& lhs, const ConstIterator& rhs) {
         return !(lhs == rhs);
     }
     inline bool operator==(const Iterator& lhs, const ConstIterator& rhs) {
-        return lhs.file == rhs.file && lhs.pageid == rhs.pageid && lhs.offset == rhs.offset;
+        return lhs.file == rhs.file && lhs.loc == rhs.loc;
     }
     inline bool operator!=(const Iterator& lhs, const ConstIterator& rhs) {
         return !(lhs == rhs);
     }
     inline bool operator==(const ConstIterator& lhs, const Iterator& rhs) {
-        return lhs.file == rhs.file && lhs.pageid == rhs.pageid && lhs.offset == rhs.offset;
+        return lhs.file == rhs.file && lhs.loc == rhs.loc;
     }
     inline bool operator!=(const ConstIterator& lhs, const Iterator& rhs) {
         return !(lhs == rhs);
