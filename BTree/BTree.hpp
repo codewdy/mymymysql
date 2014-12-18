@@ -3,56 +3,31 @@
 
 #include "PageDB/scheduler.hpp"
 #include "PageDB/iterator.hpp"
+#include "Base.hpp"
 #include <vector>
 
 namespace BTree {
-    typedef PageDB::Location Value;
-    struct Key {
-        int hash1, hash2, hash3;
-        Key(const std::string& _key);
-        Key(int _key);
-        Key(int _hash1, int _hash2, int _hash3);
-        Key(){}
-    };
-    inline bool operator<(const Key& lhs, const Key& rhs) {
-        if (lhs.hash1 == rhs.hash1 && lhs.hash2 == rhs.hash2)
-            return lhs.hash3 < rhs.hash3;
-        if (lhs.hash1 == rhs.hash1)
-            return lhs.hash2 < rhs.hash2;
-        return lhs.hash1 < rhs.hash1;
-    }
-    inline bool operator>(const Key& lhs, const Key& rhs) {
-        return rhs < lhs;
-    }
-    inline bool operator<=(const Key& lhs, const Key& rhs) {
-        return !(rhs > lhs);
-    }
-    inline bool operator>=(const Key& lhs, const Key& rhs) {
-        return !(rhs < lhs);
-    }
-    inline bool operator==(const Key& lhs, const Key& rhs) {
-        return lhs.hash1 == rhs.hash1 && lhs.hash2 == rhs.hash2 && lhs.hash3 == rhs.hash3;
-    }
-    inline bool operator!=(const Key& lhs, const Key& rhs) {
-        return !(rhs == lhs);
-    }
     struct BTreeConstIterator : public PageDB::ConstIterator {
-        //TODO
-        BTreeConstIterator(PageDB::Scheduler* _pgdb, const std::string& fn);
-        BTreeConstIterator(PageDB::Scheduler* _pgdb, PageDB::File* _file);
+        BTreeConstIterator(PageDB::Scheduler* _pgdb, PageDB::File* _file, int _pageid, int _offset)
+            : PageDB::ConstIterator(_pgdb, _file, _pageid, _offset) {}
+        const Information& Info();
         Value value();
+        virtual PageDB::Location NextLocation();
     };
     struct BTreeIterator : public PageDB::Iterator {
-        //TODO
-        BTreeIterator(PageDB::Scheduler* _pgdb, const std::string& fn);
-        BTreeIterator(PageDB::Scheduler* _pgdb, PageDB::File* _file);
-        Value value();
+        BTreeIterator(PageDB::Scheduler* _pgdb, PageDB::File* _file, int _pageid, int _offset)
+            : PageDB::Iterator(_pgdb, _file, _pageid, _offset) {}
+        Information& Info();
+        Value& value();
+        virtual PageDB::Location NextLocation();
     };
     const int MagicNumber = 0x19940319;
     const int MagicNumberOffset = 0;
     const int rootPageOffset = MagicNumberOffset + 4;
     const int usedRecordOffset = rootPageOffset + 4;
     const int avaliableRecordOffset = usedRecordOffset + 4;
+    const int LinkHeadPageOffset = avaliableRecordOffset + 4;
+    const int LinkHeadPageOffOffset = LinkHeadPageOffset + 2;
     struct BTree {
         PageDB::Scheduler* pgdb;
         PageDB::File* file;
@@ -76,6 +51,11 @@ namespace BTree {
         bool remove(const std::string& key) {
             return remove(Key(key));
         }
+        //TODO
+        //BTreeIterator writable_begin();
+        //BTreeIterator writable_end();
+        //BTreeConstIterator begin();
+        //BTreeConstIterator end();
     private:
         std::pair<bool, Value> find(const Key& key);
         bool set(const Key& key, Value value, bool force = false);
@@ -95,6 +75,12 @@ namespace BTree {
         }
         int& avalibleRecord() {
             return *(int*)(entrySession.page().buf + avaliableRecordOffset);
+        }
+        int& linkHeadPage() {
+            return *(int*)(entrySession.page().buf + LinkHeadPageOffset);
+        }
+        int& linkHeadOffset() {
+            return *(int*)(entrySession.page().buf + LinkHeadPageOffOffset);
         }
     };
 }

@@ -4,83 +4,6 @@
 #include "Utils/bufOp.hpp"
 
 namespace BTree {
-    static const int p1 = 98765431, p2 = 10016957, p3 = 57885161;
-    Key::Key(const std::string& _key) {
-        hash1 = hash2 = hash3 = 0;
-        for (auto c : _key) {
-            hash1 = hash1 * p1 + c;
-            hash2 = hash2 * p2 + c;
-            hash3 = hash3 * p3 + c;
-        }
-    }
-    Key::Key(int _key) {
-        hash1 = hash2 = hash3 = _key;
-    }
-    Key::Key(int _hash1, int _hash2, int _hash3) :
-        hash1(_hash1), hash2(_hash2), hash3(_hash3) {}
-    const int MinChild = PageDB::PAGE_SIZE / 16 / 2 - 1;
-    struct Node {
-        int size;
-        struct Child {
-            Key less;
-            PageDB::Location loc;
-        } children[MinChild * 2];
-        int findIndex(const Key& key) const {
-            int sb = 0, se = size - 1;
-            while (sb < se) {
-                int sm = (sb + se) / 2 + 1;
-                if (key < children[sm].less)
-                    se = sm - 1;
-                else
-                    sb = sm;
-            }
-            return sb;
-        }
-        bool InsertAndSplit(Key key, PageDB::Location loc, Node& splitNode) {
-            if (size == MinChild * 2) {
-                size = MinChild;
-                splitNode.size = MinChild;
-                for (int i = 0; i < MinChild; i++)
-                    splitNode.children[i] = children[i + MinChild];
-                if (key < splitNode.children[0].less)
-                    Insert(key, loc);
-                else
-                    splitNode.Insert(key, loc);
-                return true;
-            }
-            Insert(key, loc);
-            return false;
-        }
-        void Insert(Key key, PageDB::Location loc) {
-            int i;
-            for (i = size; i > 0; i--) {
-                if (key < children[i - 1].less)
-                    children[i] = children[i - 1];
-                else
-                    break;
-            }
-            children[i].less = key;
-            children[i].loc = loc;
-            size++;
-        }
-        void Remove(int idx) {
-            int p = idx;
-            size--;
-            for (int i = p; i < size; i++)
-                children[i] = children[i + 1];
-        }
-        void Merge(const Node& right) {
-            for (int i = 0; i < right.size; i++)
-                children[size + i] = right.children[i];
-            size += right.size;
-        }
-    };
-    const int InformationLength = 16;
-    struct Information {
-        Key key;
-        Value value;
-    };
-
 
 
     BTree::BTree(PageDB::Scheduler* _pgdb, const std::string& fn)
@@ -119,11 +42,11 @@ namespace BTree {
             info->value = value;
             return true;
         }
-        char buf[InformationLength];
+        char buf[sizeof(Information)];
         info = reinterpret_cast<Information*>(buf);
         info->key = key;
         info->value = value;
-        auto locX = Utils::writeFile(pgdb, file, buf, InformationLength);
+        auto locX = Utils::writeFile(pgdb, file, buf, sizeof(Information));
         insertCore(key, tr, locX);
         return true;
     }
@@ -175,6 +98,8 @@ namespace BTree {
         rootPage() = rtPage;
         usedRecord() = 0;
         avalibleRecord() = 0;
+        linkHeadPage() = infoPage;
+        linkHeadOffset() = 0;
         entrySession.flush();
     }
     void BTree::insertCore(Key key, std::vector<int>& trace, PageDB::Location loc) {
@@ -265,5 +190,25 @@ namespace BTree {
                 entrySession.flush();
             }
         }
+    }
+    const Information& BTreeConstIterator::Info() {
+        const Information* info = reinterpret_cast<const Information*>(Get());
+        return *info;
+    }
+    Information& BTreeIterator::Info() {
+        Information* info = reinterpret_cast<Information*>(Get());
+        return *info;
+    }
+    Value BTreeConstIterator::value() {
+        return Info().value;
+    }
+    Value& BTreeIterator::value() {
+        return Info().value;
+    }
+    PageDB::Location BTreeConstIterator::NextLocation() {
+        return Info().next;
+    }
+    PageDB::Location BTreeIterator::NextLocation() {
+        return Info().next;
     }
 }

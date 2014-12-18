@@ -29,9 +29,9 @@ namespace PageDB {
         }
         void Next() {
             auto nxt = NextLocation();
-            Goto(nxt.first, nxt.second);
+            Goto(nxt.Page, nxt.Offset);
         }
-        virtual std::pair<int, int> NextLocation() {
+        virtual Location NextLocation() {
             //TODO: Not Imp
             throw "Not Imp";
         }
@@ -64,9 +64,9 @@ namespace PageDB {
         }
         void Next() {
             auto nxt = NextLocation();
-            Goto(nxt.first, nxt.second);
+            Goto(nxt.Page, nxt.Offset);
         }
-        virtual std::pair<int, int> NextLocation() {
+        virtual Location NextLocation() {
             //TODO: Not Imp
             throw "Not Imp";
         }
@@ -84,6 +84,18 @@ namespace PageDB {
         return lhs.file == rhs.file && lhs.pageid == rhs.pageid && lhs.offset == rhs.offset;
     }
     inline bool operator!=(const ConstIterator& lhs, const ConstIterator& rhs) {
+        return !(lhs == rhs);
+    }
+    inline bool operator==(const Iterator& lhs, const ConstIterator& rhs) {
+        return lhs.file == rhs.file && lhs.pageid == rhs.pageid && lhs.offset == rhs.offset;
+    }
+    inline bool operator!=(const Iterator& lhs, const ConstIterator& rhs) {
+        return !(lhs == rhs);
+    }
+    inline bool operator==(const ConstIterator& lhs, const Iterator& rhs) {
+        return lhs.file == rhs.file && lhs.pageid == rhs.pageid && lhs.offset == rhs.offset;
+    }
+    inline bool operator!=(const ConstIterator& lhs, const Iterator& rhs) {
         return !(lhs == rhs);
     }
 }
