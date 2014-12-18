@@ -42,11 +42,17 @@ namespace BTree {
             info->value = value;
             return true;
         }
+        auto next = writable_end();
+        auto prev = BTreeIterator(pgdb, file, next.Info().prev);
         char buf[sizeof(Information)];
         info = reinterpret_cast<Information*>(buf);
         info->key = key;
         info->value = value;
+        info->next = next.loc;
+        info->prev = prev.loc;
         auto locX = Utils::writeFile(pgdb, file, buf, sizeof(Information));
+        next.Info().prev = locX;
+        prev.Info().next = locX;
         insertCore(key, tr, locX);
         return true;
     }
@@ -57,6 +63,11 @@ namespace BTree {
         trace(key, &tr, found, loc);
         if (!found)
             return false;
+        auto me = BTreeConstIterator(pgdb, file, loc);
+        auto next = BTreeIterator(pgdb, file, me.Info().next);
+        auto prev = BTreeIterator(pgdb, file, me.Info().prev);
+        prev.Info().next = next.loc;
+        next.Info().prev = prev.loc;
         removeCore(key, tr);
         return true;
     }
@@ -190,6 +201,22 @@ namespace BTree {
                 entrySession.flush();
             }
         }
+    }
+    BTreeIterator BTree::writable_begin() {
+        auto x = end();
+        auto loc = x.NextLocation();
+        return BTreeIterator(pgdb, file, loc.Page, loc.Offset);
+    }
+    BTreeIterator BTree::writable_end() {
+        return BTreeIterator(pgdb, file, linkHeadPage(), linkHeadOffset());
+    }
+    BTreeConstIterator BTree::begin() {
+        auto x = end();
+        auto loc = x.NextLocation();
+        return BTreeConstIterator(pgdb, file, loc.Page, loc.Offset);
+    }
+    BTreeConstIterator BTree::end() {
+        return BTreeConstIterator(pgdb, file, linkHeadPage(), linkHeadOffset());
     }
     const Information& BTreeConstIterator::Info() {
         const Information* info = reinterpret_cast<const Information*>(Get());

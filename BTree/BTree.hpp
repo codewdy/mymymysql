@@ -7,19 +7,26 @@
 #include <vector>
 
 namespace BTree {
-    struct BTreeConstIterator : public PageDB::ConstIterator {
-        BTreeConstIterator(PageDB::Scheduler* _pgdb, PageDB::File* _file, int _pageid, int _offset)
-            : PageDB::ConstIterator(_pgdb, _file, _pageid, _offset) {}
-        const Information& Info();
-        Value value();
-        virtual PageDB::Location NextLocation();
-    };
     struct BTreeIterator : public PageDB::Iterator {
         BTreeIterator(PageDB::Scheduler* _pgdb, PageDB::File* _file, int _pageid, int _offset)
             : PageDB::Iterator(_pgdb, _file, _pageid, _offset) {}
+        BTreeIterator(PageDB::Scheduler* _pgdb, PageDB::File* _file, PageDB::Location _loc)
+            : PageDB::Iterator(_pgdb, _file, _loc) {}
         Information& Info();
         Value& value();
         virtual PageDB::Location NextLocation();
+    };
+    struct BTreeConstIterator : public PageDB::ConstIterator {
+        BTreeConstIterator(PageDB::Scheduler* _pgdb, PageDB::File* _file, int _pageid, int _offset)
+            : PageDB::ConstIterator(_pgdb, _file, _pageid, _offset) {}
+        BTreeConstIterator(PageDB::Scheduler* _pgdb, PageDB::File* _file, PageDB::Location _loc)
+            : PageDB::ConstIterator(_pgdb, _file, _loc) {}
+        const Information& Info();
+        Value value();
+        virtual PageDB::Location NextLocation();
+        BTreeIterator toWritable() {
+            return BTreeIterator(pgdb, file, loc);
+        }
     };
     const int MagicNumber = 0x19940319;
     const int MagicNumberOffset = 0;
@@ -51,11 +58,10 @@ namespace BTree {
         bool remove(const std::string& key) {
             return remove(Key(key));
         }
-        //TODO
-        //BTreeIterator writable_begin();
-        //BTreeIterator writable_end();
-        //BTreeConstIterator begin();
-        //BTreeConstIterator end();
+        BTreeIterator writable_begin();
+        BTreeIterator writable_end();
+        BTreeConstIterator begin();
+        BTreeConstIterator end();
     private:
         std::pair<bool, Value> find(const Key& key);
         bool set(const Key& key, Value value, bool force = false);

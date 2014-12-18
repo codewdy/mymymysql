@@ -29,8 +29,9 @@ void test(PageDB::Scheduler* pgdb) {
             ava[pos] = ava.back();
             ava.pop_back();
         }
+        sort(ava.begin(), ava.end());
+        auto iter = bt.begin(), end = bt.end();
         for (int i : ava) {
-            //std::cout << "tesing" << i << std::endl;
             auto V = bt.find(std::to_string(i));
             auto X = V.second;
             if (!V.first)
@@ -39,12 +40,17 @@ void test(PageDB::Scheduler* pgdb) {
                 std::cout << "ERROR2!" << i << std::endl;
             if (X.Offset != i)
                 std::cout << "ERROR3!" << i << std::endl;
+            if (iter.value() != X)
+                std::cout << "ERROR4!" << i << iter.value().Offset << std::endl;
+            iter.Next();
         }
+        if (iter != end)
+            std::cout << "ERROR5!" << std::endl;
+        iter.Next();
         for (int i : removed) {
-            //std::cout << "tesing" << i << std::endl;
             auto V = bt.find(std::to_string(i));
             if (V.first)
-                std::cout << "ERROR4!" << i << std::endl;
+                std::cout << "ERROR0!" << i << std::endl;
         }
         for (int i = 0; i < ALL - DEL; i++) {
             int pos = rand() % ava.size();
