@@ -7,7 +7,6 @@
 #include "PageDB/scheduler.hpp"
 
 namespace Context {
-    typedef PageDB::LRU_Scheduler DefaultScheduler;
     static const std::string DefaultDB = "test";
     struct Context {
         PageDB::Scheduler* pgdb;
@@ -22,14 +21,16 @@ namespace Context {
             return dbName + ".db";
         }
         Context(PageDB::Scheduler* _pgdb) : pgdb(_pgdb), dbName(DefaultDB) {}
-        Context() : pgdb(new DefaultScheduler), dbName(DefaultDB) {}
-        void InitTable(const std::string& tblName, const TypeDB::TableDesc& desc) const;
-        TypeDB::TableDesc GetTableDesc(const std::string& tblName) const;
-        void DropTable(const std::string& tblName) const;
-        TypeDB::Table GetTable(const std::string& tblName) const;
-        std::pair<int, int> InsertCore(const char* beg, const char* end) const;
-        void Update(const std::string& tblName, const TypeDB::Table tbl) const;
-        void Delete(const std::string& tblName, const TypeDB::Table tbl) const;
+        void InitTable(const std::string& tblName, const TypeDB::TableDesc& desc);
+        TypeDB::TableDesc GetTableDesc(const std::string& tblName);
+        void DropTable(const std::string& tblName);
+        TypeDB::Table GetTable(const std::string& tblName);
+        void Update(const std::string& tblName, const TypeDB::Table tbl);
+        void Delete(const std::string& tblName, const TypeDB::Table tbl);
+        std::vector<std::string> ReadDB();
+        void WriteDB(const std::vector<std::string>& info);
+        bool dbNewTable(const std::string& tblName);
+        bool dbRemoveTable(const std::string& tblName);
         void ChangeDB(const std::string& _dbName) {
             dbName = _dbName;
         }

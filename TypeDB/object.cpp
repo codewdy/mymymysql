@@ -1,5 +1,6 @@
 #include "Object.hpp"
 #include "Exception/Exception.hpp"
+#include "Utils/bufOp.hpp"
 
 namespace TypeDB {
 
@@ -61,4 +62,23 @@ namespace TypeDB {
     DEF_BOOL_OP(String, le, <=);
     DEF_BOOL_OP(String, ge, >=);
     DEF_OBJ_OP(String, add, +);
+
+    BTree::Key Object::hash() {
+        RAISE(Syntax);
+    }
+    BTree::Key Int::hash() {
+        return BTree::Key(raw);
+    }
+    BTree::Key String::hash() {
+        return BTree::Key(raw);
+    }
+    void Object::write(char*& buf) {
+        RAISE(Syntax);
+    }
+    void Int::write(char*& buf) {
+        Utils::writeInt(buf, raw);
+    }
+    void String::write(char*& buf) {
+        Utils::writeString(buf, raw);
+    }
 }

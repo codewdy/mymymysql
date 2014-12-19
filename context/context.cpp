@@ -1,6 +1,7 @@
 #include "context.hpp"
 #include "utils/bufOp.hpp"
 #include "BTree/BTree.hpp"
+#include "Utils/writeFile.hpp"
 
 namespace Context {
     typedef std::pair<TypeDB::Type*, std::string> colTypeDesc;
@@ -24,16 +25,8 @@ namespace Context {
             Utils::writeByte(buf, StringEnum);
         }
     }
-    static bool newTable(const std::string& dbFile, const std::string& tblName) {
-        //TODO
-        throw "Not Imp";
-    }
-    static bool removeTable(const std::string& dbFile, const std::string& tblName) {
-        //TODO
-        throw "Not Imp";
-    }
-    void Context::InitTable(const std::string& tblName, const TypeDB::TableDesc& desc) const {
-        if (!newTable(dbFileName(), tblName)) {
+    void Context::InitTable(const std::string& tblName, const TypeDB::TableDesc& desc) {
+        if (!dbNewTable(tblName)) {
             //TODO: throw a exception
             throw "Not Imp";
         }
@@ -49,7 +42,7 @@ namespace Context {
             Utils::writeString(buf, desc.descs[i].name);
         }
     }
-    TypeDB::TableDesc Context::GetTableDesc(const std::string& tblName) const {
+    TypeDB::TableDesc Context::GetTableDesc(const std::string& tblName) {
         auto file = pgdb->OpenFile(tblFileName(tblName));
         auto x = pgdb->GetSession(file, file->entryPageID);
         auto buf = x.buf();
@@ -66,20 +59,21 @@ namespace Context {
         }
         return std::move(ret);
     }
-    void Context::DropTable(const std::string& tblName) const {
-        if (!removeTable(dbFileName(), tblName)) {
+    void Context::DropTable(const std::string& tblName) {
+        if (!dbRemoveTable(tblName)) {
             //TODO: throw a exception
             throw "Not Imp";
         }
     }
-    TypeDB::Table Context::GetTable(const std::string& tblName) const {
+    TypeDB::Table Context::GetTable(const std::string& tblName) {
         TypeDB::Table ret;
         ret.desc = GetTableDesc(tblName);
-        BTree::BTreeConstIterator iter(pgdb, tblidxFileName(tblName));
-        PageDB::ConstIterator pgiter(pgdb, tblFileName(tblName));
-        for (; !iter.End(); iter.Next()) {
+        BTree::BTree btree(pgdb, tblFileName(tblName));
+        PageDB::ConstIterator pgiter(pgdb, pgdb->OpenFile(tblFileName(tblName)));
+        auto iter = btree.begin(), end = btree.end();
+        for (; iter != end; iter.Next()) {
             auto v = iter.value();
-            pgiter.Goto(v.first, v.second);
+            pgiter.Goto(v);
             auto buf = pgiter.Get();
             TypeDB::Row row;
             row.desc = &ret.desc;
@@ -91,49 +85,84 @@ namespace Context {
         }
         return ret;
     }
-    std::pair<int, int> Context::InsertCore(const char* beg, const char* end) const {
-        //TODO
-        throw "Not Imp";
-    }
     static char* WriteRow(char* buf, const TypeDB::Row& row) {
-        //TODO
-        throw "Not Imp";
+        for (auto item : row.objs)
+            item->write(buf);
+        return buf;
     }
-    static void WriteBTree(BTree::BTree& btree, TypeDB::Object* key, int pageid, int offset, bool force = false) {
-        //TODO
-        throw "Not Imp";
-    }
-    static std::pair<int, int> ReadBTree(BTree::BTree& btree, TypeDB::Object* key) {
-        //TODO
-        throw "Not Imp";
-    }
-    static void RemoveBTree(BTree::BTree& btree, TypeDB::Object* key) {
-        //TODO
-        throw "Not Imp";
-    }
-    void Context::Update(const std::string& tblName, const TypeDB::Table tbl) const {
+    void Context::Update(const std::string& tblName, const TypeDB::Table tbl) {
+        PageDB::File* tblFile = pgdb->OpenFile(tblFileName(tblName));
         BTree::BTree btree(pgdb, tblidxFileName(tblName));
-        PageDB::Iterator iter(pgdb, tblFileName(tblName));
+        PageDB::Iterator iter(pgdb, tblFile);
         char* writeBuf = new char[PageDB::PAGE_SIZE];
         for (const TypeDB::Row& row : tbl.rows) {
-            auto loc = ReadBTree(btree, row.getPrimary());
-            iter.Goto(loc.first, loc.second);
+            auto loc = btree.find(row.getPrimary()->hash());
+            if (loc.first) {
+                throw "Not Imp";
+            }
+            iter.Goto(loc.second);
             char* buf = iter.Get();
             int size = Utils::readWord(buf);
             char* eob = WriteRow(writeBuf, row);
             if (eob - writeBuf > size) {
-                auto new_loc = InsertCore(writeBuf, eob);
-                WriteBTree(btree, row.getPrimary(), new_loc.first, new_loc.second, true);
+                auto new_loc = Utils::writeFile(pgdb, tblFile, writeBuf, eob - writeBuf);
+                btree.set(row.getPrimary()->hash(), new_loc, true);
             } else {
                 memcpy(buf, writeBuf, eob - writeBuf);
             }
         }
         delete [] writeBuf;
     }
-    void Context::Delete(const std::string& tblName, const TypeDB::Table tbl) const {
+    void Context::Delete(const std::string& tblName, const TypeDB::Table tbl) {
         BTree::BTree btree(pgdb, tblidxFileName(tblName));
         for (const TypeDB::Row& row : tbl.rows) {
-            RemoveBTree(btree, row.getPrimary());
+            btree.remove(row.getPrimary()->hash());
         }
+    }
+    std::vector<std::string> Context::ReadDB() {
+        PageDB::File* dbFile = pgdb->OpenFile(dbFileName());
+        PageDB::PageSession session = pgdb->GetSession(dbFile, dbFile->entryPageID);
+        const char* buf = session.buf();
+        int size = Utils::readInt(buf);
+        std::vector<std::string> ret;
+        for (int i = 0; i < size; i++)
+            ret.push_back(Utils::readString(buf));
+        return ret;
+    }
+    void Context::WriteDB(const std::vector<std::string>& info) {
+        PageDB::File* dbFile = pgdb->OpenFile(dbFileName());
+        PageDB::PageWriteSession session = pgdb->GetWriteSession(dbFile, dbFile->entryPageID);
+        char* buf = session.buf();
+        Utils::writeInt(buf, info.size());
+        for (auto item : info)
+            Utils::writeString(buf, item);
+    }
+    bool Context::dbNewTable(const std::string& tblName) {
+        auto x = ReadDB();
+        for (int i = 0; i < x.size(); i++) {
+            if (x[i] == tblName) {
+                return false;
+            }
+        }
+        x.push_back(tblName);
+        WriteDB(x);
+        return true;
+    }
+    bool Context::dbRemoveTable(const std::string& tblName) {
+        auto x = ReadDB();
+        int p;
+        for (p = 0; p < x.size(); p++) {
+            if (x[p] == tblName) {
+                break;
+            }
+        }
+        if (p == x.size()) {
+            return false;
+        }
+        for (int i = p; i < x.size() - 1; i++)
+            x[i] = x[i + 1];
+        x.pop_back();
+        WriteDB(x);
+        return true;
     }
 }

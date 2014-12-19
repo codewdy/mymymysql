@@ -2,6 +2,7 @@
 #define WDY_1293829183_OBJECT
 #include <string>
 #include <memory>
+#include "BTree/Hash.hpp"
 
 namespace TypeDB {
     struct Object {
@@ -14,6 +15,8 @@ namespace TypeDB {
         virtual bool op_ge(Object* rhs);
         virtual Object* op_add(Object* rhs);
         virtual Object* op_minus(Object* rhs);
+        virtual BTree::Key hash();
+        virtual void write(char*& buf);
     };
     struct Null : public Object {
         virtual bool op_eq(Object* rhs);
@@ -34,10 +37,13 @@ namespace TypeDB {
         virtual bool op_ge(Object* rhs);
         virtual Object* op_add(Object* rhs);
         virtual Object* op_minus(Object* rhs);
+        virtual BTree::Key hash();
+        virtual void write(char*& buf);
     };
     struct Double : public Object {
         double raw;
         Double(double _raw) : raw(_raw) {}
+        virtual BTree::Key hash();
     };
     struct String : public Object {
         std::string raw;
@@ -50,6 +56,8 @@ namespace TypeDB {
         virtual bool op_le(Object* rhs);
         virtual bool op_ge(Object* rhs);
         virtual Object* op_add(Object* rhs);
+        virtual BTree::Key hash();
+        virtual void write(char*& buf);
     };
     struct pObject {
         Object* obj;
@@ -60,6 +68,21 @@ namespace TypeDB {
         pObject(Object* _obj) : obj(_obj), ref(new int(1)) {}
         pObject(const pObject& pobj) : obj(pobj.obj), ref(pobj.ref) {Increase();}
         pObject(pObject&& pobj) : obj(pobj.obj), ref(pobj.ref) {pobj.obj = nullptr; pobj.ref = nullptr;}
+        pObject& operator=(const pObject& rhs) {
+            Reduce();
+            obj = rhs.obj;
+            ref = rhs.ref;
+            Increase();
+            return *this;
+        }
+        pObject& operator=(pObject&& rhs) {
+            Reduce();
+            obj = rhs.obj;
+            ref = rhs.ref;
+            rhs.obj = nullptr;
+            rhs.ref = nullptr;
+            return *this;
+        }
         Object* operator->() {return obj;}
         operator Object*() {return obj;}
     };
