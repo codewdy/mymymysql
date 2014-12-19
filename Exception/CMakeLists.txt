@@ -1,0 +1,1 @@
+new_static_library(Exception)

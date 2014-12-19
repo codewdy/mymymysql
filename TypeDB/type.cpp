@@ -14,4 +14,8 @@ namespace TypeDB {
     Object* StringType::CreateAndJump(const char*& buf) {
         return new String(Utils::readString(buf));
     }
+    static IntType intTypeX;
+    static StringType stringTypeX;
+    IntType* intType = &intTypeX;
+    StringType* stringType = &stringTypeX;
 }

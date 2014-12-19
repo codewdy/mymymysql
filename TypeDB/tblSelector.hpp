@@ -5,13 +5,13 @@
 
 namespace TypeDB {
     struct TableSelector {
-        virtual Table getTable(const Context::Context& ctx) = 0;
+        virtual Table getTable(Context::Context& ctx) = 0;
         virtual ~TableSelector();
     };
     struct RawTableSelector : TableSelector{
         std::string tblname;
         RawTableSelector(std::string _tblname) : tblname(_tblname) {}
-        virtual Table getTable(const Context::Context& ctx);
+        virtual Table getTable(Context::Context& ctx);
     };
 }
 

@@ -28,6 +28,9 @@ namespace TypeDB {
     pObject Row::getObj(const std::string& tbl, const std::string& name) const {
         return objs[desc->getIndex(tbl, name)];
     }
+    pObject Row::getPrimary() const {
+        return objs[desc->primaryIndex];
+    }
     std::vector<pObject> Table::getVec(const std::string& tbl, const std::string& name) const {
         std::size_t index = desc.getIndex(tbl, name);
         std::vector<pObject> ret;
