@@ -62,10 +62,10 @@ namespace BTree {
         BTreeIterator writable_end();
         BTreeConstIterator begin();
         BTreeConstIterator end();
-    private:
         std::pair<bool, Value> find(const Key& key);
         bool set(const Key& key, Value value, bool force = false);
         bool remove(const Key& key);
+    private:
         void trace(const Key& key, std::vector<int>* tr, bool& found, PageDB::Location& loc);
         void initBTree();
         void insertCore(Key key, std::vector<int>& trace, PageDB::Location loc);
