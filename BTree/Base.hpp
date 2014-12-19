@@ -1,15 +1,9 @@
 #ifndef WDY_0192103485_BTREE_BASE
 #define WDY_0192103485_BTREE_BASE
 #include "PageDB/file.hpp"
+#include "Hash.hpp"
 namespace BTree {
     typedef PageDB::Location Value;
-    struct Key {
-        int hash1, hash2, hash3;
-        Key(const std::string& _key);
-        Key(int _key);
-        Key(int _hash1, int _hash2, int _hash3);
-        Key(){}
-    };
     inline bool operator<(const Key& lhs, const Key& rhs) {
         if (lhs.hash1 == rhs.hash1 && lhs.hash2 == rhs.hash2)
             return lhs.hash3 < rhs.hash3;
