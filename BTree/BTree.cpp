@@ -104,13 +104,16 @@ namespace BTree {
         int rtPage = file->newPage();
         int infoPage = file->newPage();
         file->eof.Page = infoPage;
-        file->eof.Offset = 0;
+        file->eof.Offset = sizeof(Information);
         file->writebackFileHeaderCore();
         rootPage() = rtPage;
         usedRecord() = 0;
         avalibleRecord() = 0;
         linkHeadPage() = infoPage;
         linkHeadOffset() = 0;
+        PageDB::PageWriteSession s = pgdb->GetWriteSession(file, infoPage);
+        Information* info = reinterpret_cast<Information*>(s.buf());
+        info->next = info->prev = PageDB::Location(infoPage, 0);
         entrySession.flush();
     }
     void BTree::insertCore(Key key, std::vector<int>& trace, PageDB::Location loc) {
