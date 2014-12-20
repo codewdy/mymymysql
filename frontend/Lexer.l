@@ -33,6 +33,7 @@ WHITESPACE           ([ \t]+)
 
 "+"                             {BuildOp(PLUS);}
 "-"                             {BuildOp(MINUS);}
+"*"                             {BuildOp(STAR);}
 ">"                             {BuildOp(GT);}
 "<"                             {BuildOp(LT);}
 ">="                            {BuildOp(GE);}

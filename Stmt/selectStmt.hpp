@@ -9,6 +9,7 @@ namespace Stmt {
     struct SelectStmt : public Stmt {
         virtual void Run(Context::Context& ctx);
         std::vector<TypeDB::TblExpr*> select;
+        bool selectAll;
         std::vector<TypeDB::TableSelector*> from;
         TypeDB::Expr* where;
     };

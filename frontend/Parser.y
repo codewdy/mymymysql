@@ -67,7 +67,8 @@ selectStmt(A) ::= selectStmt(B) whereClause(C) . {A = B; A->where = C;}
 
 %type selectClause {Stmt::SelectStmt*}
 %destructor selectClause {delete $$;}
-selectClause(A) ::= SELECT tblExprList(B) . {A = new Stmt::SelectStmt; A->select.swap(*B); delete B;}
+selectClause(A) ::= SELECT tblExprList(B) . {A = new Stmt::SelectStmt; A->select.swap(*B); A->selectAll = false; delete B;}
+selectClause(A) ::= SELECT STAR . {A = new Stmt::SelectStmt; A->selectAll = true;}
 
 %type tblExprList {std::vector<TypeDB::TblExpr*>*}
 %destructor tblExprList {delete $$;}

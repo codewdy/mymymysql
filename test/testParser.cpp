@@ -38,7 +38,7 @@ int main() {
     tbl.rows.push_back(row2);
     tbl.rows.push_back(row3);
     ctx.Insert("wdy", tbl);
-    auto stmt = Parser::CreateAST("select a from wdy where b.id = 3 and (b.name = \" \" or b.name = \"a\")");
+    auto stmt = Parser::CreateAST("select * from wdy where b.id = 3 and (b.name = \" \" or b.name = \"a\")");
     stmt->Run(ctx);
     pgdb->StopSchedule();
     delete pgdb;
