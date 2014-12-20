@@ -27,6 +27,7 @@ namespace Parser {
         try {
             yyFlexLexer lexer(&stream);
             while (lexer.yylex()) {
+                std::cout << "Info:" << curLex.type << std::endl;
                 Parse(parser, curLex.type, curLex.raw, 0);
                 delete curLex.raw;
             }
@@ -85,7 +86,7 @@ tblExpr(A) ::= MAX LLC tblExpr(B) RLC . {A = new TypeDB::UnaryTblExpr(B, TypeDB:
 
 %type fromClause {std::vector<TypeDB::TableSelector*>*}
 %destructor fromClause {delete $$;}
-fromClause(A) ::= FROM tables(B) . {A = B;}
+fromClause(A) ::= FROM tables(B) . {std::cout << B->size() << std::endl;A = B;}
 
 %type tables {std::vector<TypeDB::TableSelector*>*}
 %destructor tables {delete $$;}
@@ -120,7 +121,7 @@ expr(A) ::= STRING(B) . {A = new TypeDB::LiteralExpr(TypeDB::StringType::Create(
 expr(A) ::= INTEGER(B) . {A = new TypeDB::LiteralExpr(TypeDB::IntType::Create(std::stoi(*B)));}
 expr(A) ::= NULL_ . {A = new TypeDB::LiteralExpr(TypeDB::NullType::Create());}
 expr(A) ::= IDENTIFIER(B) . {A = new TypeDB::ReadExpr(*B);}
-expr(A) ::= IDENTIFIER(B) DOT INDENTIFIER(C) . {A = new TypeDB::ReadExpr(*B, *C);}
+expr(A) ::= IDENTIFIER(B) DOT IDENTIFIER(C) . {A = new TypeDB::ReadExpr(*B, *C);}
 //Simple Expr
 expr(A) ::= LLC expr(B) RLC . {A = B;}
 expr(A) ::= expr(B) PLUS expr(C) . {A = new TypeDB::BinaryExpr(B, C, TypeDB::BinaryExpr::Plus);}

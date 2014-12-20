@@ -1,5 +1,5 @@
 #include "frontend/Parser.hpp"
 
 int main() {
-    Parser::CreateAST("SELECT A FROM B WHERE B.id = 3");
+    Parser::CreateAST("select a from b where b.id = 3 and (b.name = \" \" or b.name = \"a\")");
 }

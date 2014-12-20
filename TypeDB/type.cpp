@@ -16,6 +16,8 @@ namespace TypeDB {
     }
     static IntType intTypeX;
     static StringType stringTypeX;
+    static Null null;
+    Null* NullType::none = &null;
     IntType* intType = &intTypeX;
     StringType* stringType = &stringTypeX;
 }

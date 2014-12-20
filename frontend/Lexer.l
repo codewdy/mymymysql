@@ -44,6 +44,7 @@ WHITESPACE           ([ \t]+)
 "not"                           {BuildOp(NOT);}
 "and"                           {BuildOp(AND);}
 "or"                            {BuildOp(OR);}
+"."                             {BuildOp(DOT);}
 "select"                        {BuildOp(SELECT);}
 "from"                          {BuildOp(FROM);}
 "where"                         {BuildOp(WHERE);}

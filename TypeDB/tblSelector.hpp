@@ -6,7 +6,7 @@
 namespace TypeDB {
     struct TableSelector {
         virtual Table getTable(Context::Context& ctx) = 0;
-        virtual ~TableSelector();
+        virtual ~TableSelector() {}
     };
     struct RawTableSelector : TableSelector{
         std::string tblname;

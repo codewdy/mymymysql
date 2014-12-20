@@ -45,7 +45,6 @@ namespace TypeDB {
     struct Double : public Object {
         double raw;
         Double(double _raw) : raw(_raw) {}
-        virtual BTree::Key hash();
         virtual std::string toString();
     };
     struct String : public Object {

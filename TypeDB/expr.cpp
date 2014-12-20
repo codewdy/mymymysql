@@ -12,6 +12,10 @@ namespace TypeDB {
 
     Expr::~Expr() {}
 
+    pObject LiteralExpr::Calc(const Row& row) {
+        return Literal;
+    }
+
     pObject ReadExpr::Calc(const Row& row) {
         return row.getObj(tbl, name);
     }
