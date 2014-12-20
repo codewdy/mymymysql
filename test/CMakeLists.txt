@@ -8,4 +8,4 @@ ADD_EXECUTABLE(testContext testContext.cpp)
 TARGET_LINK_LIBRARIES(testContext BTree PageDB TypeDB Context Exception)
 
 ADD_EXECUTABLE(testParser testParser.cpp)
-TARGET_LINK_LIBRARIES(testContext Parser)
+TARGET_LINK_LIBRARIES(testParser Parser)
