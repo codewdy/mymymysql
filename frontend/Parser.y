@@ -17,26 +17,33 @@ extern Lex curLex;
 
 %code {
 #include <string>
+#include <vector>
 #include <fstream>
 #include <sstream>
 #include "Lexer.h"
 namespace Parser {
     Stmt::Stmt* CreateAST(std::string st) {
+        std::vector<std::string*> strs;
         void *parser = ParseAlloc(malloc);
         std::stringstream stream(st);
         try {
             yyFlexLexer lexer(&stream);
             while (lexer.yylex()) {
+                if (curLex.raw)
+                    strs.push_back(curLex.raw);
                 Parse(parser, curLex.type, curLex.raw, 0);
-                delete curLex.raw;
             }
             Stmt::Stmt* ret;
             Parse(parser, 0, 0, &ret);
             return ret;
         } catch(Exception::Exception *e) {
             ParseFree(parser, free);
+            for (auto p : strs)
+                delete p;
             throw e;
         }
+        for (auto p : strs)
+            delete p;
     }
 }
 }
@@ -67,8 +74,8 @@ selectStmt(A) ::= selectStmt(B) whereClause(C) . {A = B; A->where = C;}
 
 %type selectClause {Stmt::SelectStmt*}
 %destructor selectClause {delete $$;}
-selectClause(A) ::= SELECT tblExprList(B) . {A = new Stmt::SelectStmt; A->select.swap(*B); A->selectAll = false; delete B;}
-selectClause(A) ::= SELECT STAR . {A = new Stmt::SelectStmt; A->selectAll = true;}
+selectClause(A) ::= SELECT tblExprList(B) . {A = new Stmt::SelectStmt; A->select.swap(*B); A->selectAll = false; A->where = nullptr; delete B;}
+selectClause(A) ::= SELECT STAR . {A = new Stmt::SelectStmt; A->selectAll = true; A->where = nullptr;}
 
 %type tblExprList {std::vector<TypeDB::TblExpr*>*}
 %destructor tblExprList {delete $$;}

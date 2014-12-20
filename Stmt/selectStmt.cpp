@@ -4,6 +4,13 @@
 namespace Stmt {
     void SelectStmt::Run(Context::Context& ctx) {
         auto tbl = from[0]->getTable(ctx);
+        if (where) {
+            std::vector<TypeDB::Row> rows;
+            for (auto row : tbl.rows)
+                if (where->CalcBool(row))
+                    rows.push_back(std::move(row));
+            tbl.rows.swap(rows);
+        }
         if (selectAll) {
             for (auto& row : tbl.rows) {
                 for (auto& item : row.objs)
