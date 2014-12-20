@@ -38,8 +38,10 @@ int main() {
     tbl.rows.push_back(row2);
     tbl.rows.push_back(row3);
     ctx.Insert("wdy", tbl);
-    auto stmt = Parser::CreateAST("select W, D from wdy where b.id = 3 and (b.name = \" \" or b.name = \"a\")");
+    auto stmt = Parser::CreateAST("select W, D from wdy");
     stmt->Run(ctx);
+    Parser::CreateAST("select * from wdy")->Run(ctx);
+    Parser::CreateAST("select sum(W), avg(W), min(W), max(W), sum(D) from wdy")->Run(ctx);
     pgdb->StopSchedule();
     delete pgdb;
 }

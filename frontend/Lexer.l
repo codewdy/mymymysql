@@ -50,6 +50,10 @@ WHITESPACE           ([ \t]+)
 "select"                        {BuildOp(SELECT);}
 "from"                          {BuildOp(FROM);}
 "where"                         {BuildOp(WHERE);}
+"sum"                           {BuildOp(SUM);}
+"avg"                           {BuildOp(AVG);}
+"min"                           {BuildOp(MIN);}
+"max"                           {BuildOp(MAX);}
 
 {INTEGER}                       {BuildLex(INTEGER);}
 
