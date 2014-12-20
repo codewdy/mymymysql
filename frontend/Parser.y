@@ -27,7 +27,6 @@ namespace Parser {
         try {
             yyFlexLexer lexer(&stream);
             while (lexer.yylex()) {
-                std::cout << "Info:" << curLex.type << std::endl;
                 Parse(parser, curLex.type, curLex.raw, 0);
                 delete curLex.raw;
             }
@@ -86,7 +85,7 @@ tblExpr(A) ::= MAX LLC tblExpr(B) RLC . {A = new TypeDB::UnaryTblExpr(B, TypeDB:
 
 %type fromClause {std::vector<TypeDB::TableSelector*>*}
 %destructor fromClause {delete $$;}
-fromClause(A) ::= FROM tables(B) . {std::cout << B->size() << std::endl;A = B;}
+fromClause(A) ::= FROM tables(B) . {A = B;}
 
 %type tables {std::vector<TypeDB::TableSelector*>*}
 %destructor tables {delete $$;}
