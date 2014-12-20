@@ -80,7 +80,6 @@ namespace Context {
         auto iter = btree.begin(), end = btree.end();
         for (; iter != end; iter.Next()) {
             auto v = iter.value();
-            std::cout << iter.Info().key.hash1 << std::endl;
             pgiter.Goto(v);
             auto buf = pgiter.Get();
             TypeDB::Row row;
@@ -109,7 +108,6 @@ namespace Context {
         for (const TypeDB::Row& row : tbl.rows) {
             char* eob = WriteRow(writeBuf, row);
             auto loc = Utils::writeFile(pgdb, tblFile, writeBuf, eob - writeBuf);
-            std::cout << row.getPrimary()->toString() << std::endl;
             btree.set(row.getPrimary()->hash(), loc, true);
         }
         delete [] writeBuf;

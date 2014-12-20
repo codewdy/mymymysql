@@ -47,6 +47,24 @@ void test(PageDB::Scheduler* pgdb) {
             std::cout << item->toString() << " ";
         std::cout << std::endl;
     }
+    tbl.rows.clear();
+    tbl.rows.push_back(row2);
+    ctx.Delete("wdy", tbl);
+    tbl_rst = ctx.GetTable("wdy");
+    for (auto row : tbl_rst.rows) {
+        for (auto item : row.objs)
+            std::cout << item->toString() << " ";
+        std::cout << std::endl;
+    }
+    tbl.rows.clear();
+    tbl.rows.push_back(row1);
+    ctx.Delete("wdy", tbl);
+    tbl_rst = ctx.GetTable("wdy");
+    for (auto row : tbl_rst.rows) {
+        for (auto item : row.objs)
+            std::cout << item->toString() << " ";
+        std::cout << std::endl;
+    }
 }
 
 int main() {
