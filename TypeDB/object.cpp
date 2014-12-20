@@ -81,4 +81,16 @@ namespace TypeDB {
     void String::write(char*& buf) {
         Utils::writeString(buf, raw);
     }
+    std::string Object::toString() {
+        RAISE(Syntax);
+    }
+    std::string Int::toString() {
+        return std::to_string(raw);
+    }
+    std::string Double::toString() {
+        return std::to_string(raw);
+    }
+    std::string String::toString() {
+        return raw;
+    }
 }

@@ -5,7 +5,7 @@
 
 namespace Context {
     typedef std::pair<TypeDB::Type*, std::string> colTypeDesc;
-    enum TypeEnum {
+    enum TypeEnum : Utils::byte {
         IntEnum,
         StringEnum,
     };
@@ -15,14 +15,19 @@ namespace Context {
                 return TypeDB::intType;
             case StringEnum:
                 return TypeDB::stringType;
+            default:
+                //TODO
+                throw "Not Imp";
         }
-        return nullptr;
     }
     static void writeType(char*& buf, TypeDB::Type* desc) {
         if (desc == TypeDB::intType) {
             Utils::writeByte(buf, IntEnum);
         } else if (desc == TypeDB::stringType) {
             Utils::writeByte(buf, StringEnum);
+        } else {
+            //TODO
+            throw "Not Imp";
         }
     }
     void Context::InitTable(const std::string& tblName, const TypeDB::TableDesc& desc) {
@@ -41,6 +46,8 @@ namespace Context {
             writeType(buf, desc.descs[i].type);
             Utils::writeString(buf, desc.descs[i].name);
         }
+        file->eof = PageDB::Location(file->newPage(), 0);
+        file->writebackFileHeaderCore();
     }
     TypeDB::TableDesc Context::GetTableDesc(const std::string& tblName) {
         auto file = pgdb->OpenFile(tblFileName(tblName));
@@ -68,11 +75,12 @@ namespace Context {
     TypeDB::Table Context::GetTable(const std::string& tblName) {
         TypeDB::Table ret;
         ret.desc = GetTableDesc(tblName);
-        BTree::BTree btree(pgdb, tblFileName(tblName));
+        BTree::BTree btree(pgdb, tblidxFileName(tblName));
         PageDB::ConstIterator pgiter(pgdb, pgdb->OpenFile(tblFileName(tblName)));
         auto iter = btree.begin(), end = btree.end();
         for (; iter != end; iter.Next()) {
             auto v = iter.value();
+            std::cout << iter.Info().key.hash1 << std::endl;
             pgiter.Goto(v);
             auto buf = pgiter.Get();
             TypeDB::Row row;
@@ -86,9 +94,25 @@ namespace Context {
         return ret;
     }
     static char* WriteRow(char* buf, const TypeDB::Row& row) {
+        char* org_buf = buf;
+        Utils::jumpWord(buf);
         for (auto item : row.objs)
             item->write(buf);
+        Utils::writeWord(org_buf, buf - org_buf);
         return buf;
+    }
+    void Context::Insert(const std::string& tblName, const TypeDB::Table tbl) {
+        PageDB::File* tblFile = pgdb->OpenFile(tblFileName(tblName));
+        BTree::BTree btree(pgdb, tblidxFileName(tblName));
+        PageDB::Iterator iter(pgdb, tblFile);
+        char* writeBuf = new char[PageDB::PAGE_SIZE];
+        for (const TypeDB::Row& row : tbl.rows) {
+            char* eob = WriteRow(writeBuf, row);
+            auto loc = Utils::writeFile(pgdb, tblFile, writeBuf, eob - writeBuf);
+            std::cout << row.getPrimary()->toString() << std::endl;
+            btree.set(row.getPrimary()->hash(), loc, true);
+        }
+        delete [] writeBuf;
     }
     void Context::Update(const std::string& tblName, const TypeDB::Table tbl) {
         PageDB::File* tblFile = pgdb->OpenFile(tblFileName(tblName));
@@ -139,7 +163,7 @@ namespace Context {
     }
     bool Context::dbNewTable(const std::string& tblName) {
         auto x = ReadDB();
-        for (int i = 0; i < x.size(); i++) {
+        for (std::size_t i = 0; i < x.size(); i++) {
             if (x[i] == tblName) {
                 return false;
             }
@@ -150,7 +174,7 @@ namespace Context {
     }
     bool Context::dbRemoveTable(const std::string& tblName) {
         auto x = ReadDB();
-        int p;
+        std::size_t p;
         for (p = 0; p < x.size(); p++) {
             if (x[p] == tblName) {
                 break;
@@ -159,7 +183,7 @@ namespace Context {
         if (p == x.size()) {
             return false;
         }
-        for (int i = p; i < x.size() - 1; i++)
+        for (std::size_t i = p; i + 1 < x.size(); i++)
             x[i] = x[i + 1];
         x.pop_back();
         WriteDB(x);

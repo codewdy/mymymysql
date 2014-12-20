@@ -17,6 +17,7 @@ namespace TypeDB {
         virtual Object* op_minus(Object* rhs);
         virtual BTree::Key hash();
         virtual void write(char*& buf);
+        virtual std::string toString();
     };
     struct Null : public Object {
         virtual bool op_eq(Object* rhs);
@@ -39,11 +40,13 @@ namespace TypeDB {
         virtual Object* op_minus(Object* rhs);
         virtual BTree::Key hash();
         virtual void write(char*& buf);
+        virtual std::string toString();
     };
     struct Double : public Object {
         double raw;
         Double(double _raw) : raw(_raw) {}
         virtual BTree::Key hash();
+        virtual std::string toString();
     };
     struct String : public Object {
         std::string raw;
@@ -58,6 +61,7 @@ namespace TypeDB {
         virtual Object* op_add(Object* rhs);
         virtual BTree::Key hash();
         virtual void write(char*& buf);
+        virtual std::string toString();
     };
     struct pObject {
         Object* obj;

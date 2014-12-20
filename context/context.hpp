@@ -25,6 +25,7 @@ namespace Context {
         TypeDB::TableDesc GetTableDesc(const std::string& tblName);
         void DropTable(const std::string& tblName);
         TypeDB::Table GetTable(const std::string& tblName);
+        void Insert(const std::string& tblName, const TypeDB::Table tbl);
         void Update(const std::string& tblName, const TypeDB::Table tbl);
         void Delete(const std::string& tblName, const TypeDB::Table tbl);
         std::vector<std::string> ReadDB();
