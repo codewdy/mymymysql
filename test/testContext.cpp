@@ -4,6 +4,17 @@
 #include <ctime>
 #include <cstdio>
 #include <set>
+#include <string>
+
+void Print(Context::Context& ctx, std::string tbName) {
+    TypeDB::Table tbl_rst = ctx.GetTable(tbName);
+    for (auto row : tbl_rst.rows) {
+        for (auto item : row.objs)
+            std::cout << item->toString() << " ";
+        std::cout << std::endl;
+    }
+    std::cout << std::endl;
+}
 
 void test(PageDB::Scheduler* pgdb) {
     std::srand((unsigned int)time(NULL));
@@ -41,30 +52,19 @@ void test(PageDB::Scheduler* pgdb) {
     tbl.rows.push_back(row2);
     tbl.rows.push_back(row3);
     ctx.Insert("wdy", tbl);
-    TypeDB::Table tbl_rst = ctx.GetTable("wdy");
-    for (auto row : tbl_rst.rows) {
-        for (auto item : row.objs)
-            std::cout << item->toString() << " ";
-        std::cout << std::endl;
-    }
+    Print(ctx, "wdy");
     tbl.rows.clear();
     tbl.rows.push_back(row2);
     ctx.Delete("wdy", tbl);
-    tbl_rst = ctx.GetTable("wdy");
-    for (auto row : tbl_rst.rows) {
-        for (auto item : row.objs)
-            std::cout << item->toString() << " ";
-        std::cout << std::endl;
-    }
+    Print(ctx, "wdy");
     tbl.rows.clear();
     tbl.rows.push_back(row1);
     ctx.Delete("wdy", tbl);
-    tbl_rst = ctx.GetTable("wdy");
-    for (auto row : tbl_rst.rows) {
-        for (auto item : row.objs)
-            std::cout << item->toString() << " ";
-        std::cout << std::endl;
-    }
+    Print(ctx, "wdy");
+    row3.objs[2] = new TypeDB::String("wdy");
+    tbl.rows[0] = row3;
+    ctx.Update("wdy", tbl);
+    Print(ctx, "wdy");
 }
 
 int main() {

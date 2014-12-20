@@ -119,7 +119,7 @@ namespace Context {
         char* writeBuf = new char[PageDB::PAGE_SIZE];
         for (const TypeDB::Row& row : tbl.rows) {
             auto loc = btree.find(row.getPrimary()->hash());
-            if (loc.first) {
+            if (!loc.first) {
                 throw "Not Imp";
             }
             iter.Goto(loc.second);
