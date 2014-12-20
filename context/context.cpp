@@ -100,7 +100,7 @@ namespace Context {
         Utils::writeWord(org_buf, buf - org_buf);
         return buf;
     }
-    void Context::Insert(const std::string& tblName, const TypeDB::Table tbl) {
+    void Context::Insert(const std::string& tblName, const TypeDB::Table& tbl) {
         PageDB::File* tblFile = pgdb->OpenFile(tblFileName(tblName));
         BTree::BTree btree(pgdb, tblidxFileName(tblName));
         PageDB::Iterator iter(pgdb, tblFile);
@@ -112,7 +112,7 @@ namespace Context {
         }
         delete [] writeBuf;
     }
-    void Context::Update(const std::string& tblName, const TypeDB::Table tbl) {
+    void Context::Update(const std::string& tblName, const TypeDB::Table& tbl) {
         PageDB::File* tblFile = pgdb->OpenFile(tblFileName(tblName));
         BTree::BTree btree(pgdb, tblidxFileName(tblName));
         PageDB::Iterator iter(pgdb, tblFile);
@@ -135,7 +135,7 @@ namespace Context {
         }
         delete [] writeBuf;
     }
-    void Context::Delete(const std::string& tblName, const TypeDB::Table tbl) {
+    void Context::Delete(const std::string& tblName, const TypeDB::Table& tbl) {
         BTree::BTree btree(pgdb, tblidxFileName(tblName));
         for (const TypeDB::Row& row : tbl.rows) {
             btree.remove(row.getPrimary()->hash());
