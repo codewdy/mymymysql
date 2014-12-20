@@ -71,11 +71,12 @@ stmt(A) ::= selectStmt(B). {*ret = A = B;}
 %destructor selectStmt {delete $$;}
 selectStmt(A) ::= selectClause(B) fromClause(C) . {A = B; A->from.swap(*C); delete C;}
 selectStmt(A) ::= selectStmt(B) whereClause(C) . {A = B; A->where = C;}
+selectStmt(A) ::= selectStmt(B) groupbyClause(C) . {A = B; A->groupby = C;}
 
 %type selectClause {Stmt::SelectStmt*}
 %destructor selectClause {delete $$;}
-selectClause(A) ::= SELECT tblExprList(B) . {A = new Stmt::SelectStmt; A->select.swap(*B); A->selectAll = false; A->where = nullptr; delete B;}
-selectClause(A) ::= SELECT STAR . {A = new Stmt::SelectStmt; A->selectAll = true; A->where = nullptr;}
+selectClause(A) ::= SELECT tblExprList(B) . {A = new Stmt::SelectStmt; A->select.swap(*B); delete B;}
+selectClause(A) ::= SELECT STAR . {A = new Stmt::SelectStmt; A->selectAll = true;}
 
 %type tblExprList {std::vector<TypeDB::TblExpr*>*}
 %destructor tblExprList {delete $$;}
@@ -94,6 +95,10 @@ tblExpr(A) ::= MAX LLC tblExpr(B) RLC . {A = new TypeDB::UnaryTblExpr(B, TypeDB:
 %type fromClause {std::vector<TypeDB::TableSelector*>*}
 %destructor fromClause {delete $$;}
 fromClause(A) ::= FROM tables(B) . {A = B;}
+
+%type groupbyClause {TypeDB::Expr*}
+%destructor groupbyClause {delete $$;}
+groupbyClause(A) ::= GROUP BY expr(B) . {A = B;}
 
 %type tables {std::vector<TypeDB::TableSelector*>*}
 %destructor tables {delete $$;}

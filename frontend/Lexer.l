@@ -54,6 +54,8 @@ WHITESPACE           ([ \t]+)
 "avg"                           {BuildOp(AVG);}
 "min"                           {BuildOp(MIN);}
 "max"                           {BuildOp(MAX);}
+"group"                         {BuildOp(GROUP);}
+"by"                            {BuildOp(BY);}
 
 {INTEGER}                       {BuildLex(INTEGER);}
 

@@ -10,8 +10,10 @@ namespace Stmt {
         virtual void Run(Context::Context& ctx);
         std::vector<TypeDB::TblExpr*> select;
         bool selectAll;
+        TypeDB::Expr* groupby;
         std::vector<TypeDB::TableSelector*> from;
         TypeDB::Expr* where;
+        SelectStmt() : selectAll(false), groupby(nullptr), where(nullptr) {}
     };
 }
 #endif
