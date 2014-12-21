@@ -1,16 +1,10 @@
 #include "SelectStmt.hpp"
+#include "filter.hpp"
 #include <iostream>
 
 namespace Stmt {
     void SelectStmt::Run(Context::Context& ctx) {
-        auto tbl = from[0]->getTable(ctx);
-        if (where) {
-            std::vector<TypeDB::Row> rows;
-            for (auto row : tbl.rows)
-                if (where->CalcBool(tbl.desc, row))
-                    rows.push_back(std::move(row));
-            tbl.rows.swap(rows);
-        }
+        auto tbl = filter(ctx, from, where);
         if (selectAll) {
             for (auto& row : tbl.rows) {
                 for (auto& item : row.objs)
