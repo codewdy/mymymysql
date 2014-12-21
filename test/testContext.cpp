@@ -8,8 +8,8 @@
 
 void Print(Context::Context& ctx, std::string tbName) {
     TypeDB::Table tbl_rst = ctx.GetTable(tbName);
-    for (auto row : tbl_rst.rows) {
-        for (auto item : row.objs)
+    for (auto& row : tbl_rst.rows) {
+        for (auto& item : row.objs)
             std::cout << item->toString() << " ";
         std::cout << std::endl;
     }

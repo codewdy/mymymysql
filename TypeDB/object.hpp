@@ -86,8 +86,8 @@ namespace TypeDB {
             rhs.ref = nullptr;
             return *this;
         }
-        Object* operator->() {return obj;}
-        operator Object*() {return obj;}
+        Object* operator->() const {return obj;}
+        operator Object*() const {return obj;}
     };
 }
 

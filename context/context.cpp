@@ -94,7 +94,7 @@ namespace Context {
     static char* WriteRow(char* buf, const TypeDB::Row& row) {
         char* org_buf = buf;
         Utils::jumpWord(buf);
-        for (auto item : row.objs)
+        for (auto& item : row.objs)
             item->write(buf);
         Utils::writeWord(org_buf, buf - org_buf);
         return buf;
@@ -155,7 +155,7 @@ namespace Context {
         PageDB::PageWriteSession session = pgdb->GetWriteSession(dbFile, dbFile->entryPageID);
         char* buf = session.buf();
         Utils::writeInt(buf, info.size());
-        for (auto item : info)
+        for (auto& item : info)
             Utils::writeString(buf, item);
     }
     bool Context::dbNewTable(const std::string& tblName) const {

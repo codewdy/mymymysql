@@ -52,9 +52,9 @@ namespace PageDB {
     }
     Scheduler::~Scheduler() {
         StopSchedule();
-        for (auto item : pageIndex)
+        for (auto& item : pageIndex)
             delete item.second;
-        for (auto item : fileIndex)
+        for (auto& item : fileIndex)
             delete item.second;
     }
 }

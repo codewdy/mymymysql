@@ -23,7 +23,7 @@ namespace PageDB {
             throw "Not Imp";
         }
         std::unordered_set<int> Vs;
-        for (auto item : pageMap) {
+        for (auto& item : pageMap) {
             Vs.insert(item.second);
         }
         int vaddr = -1, paddr = -1;
@@ -82,7 +82,7 @@ namespace PageDB {
         unsigned short tmp;
         tmp = pageMap.size();
         raw.write((const char*)&tmp, 2);
-        for (auto item : pageMap) {
+        for (auto& item : pageMap) {
             raw.write((const char*)&item.first, 2);
             raw.write((const char*)&item.second, 2);
         }

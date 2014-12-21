@@ -93,7 +93,7 @@ namespace Utils {
     }
     inline void writeString(char*& buf, const std::string& v) {
         writeWord(buf, v.size());
-        for (auto c : v)
-            writeByte(buf, c);
+        memcpy(buf, v.data(), v.size());
+        buf += v.size();
     }
 }
