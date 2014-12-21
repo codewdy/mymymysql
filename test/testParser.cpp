@@ -24,7 +24,6 @@ int main() {
     TypeDB::Table tbl;
     tbl.desc = desc;
     TypeDB::Row row1, row2, row3;
-    row1.desc = row2.desc = row3.desc = &tbl.desc;
     row1.objs.push_back(new TypeDB::Int(1));
     row1.objs.push_back(new TypeDB::String("wdy"));
     row1.objs.push_back(new TypeDB::String("abc"));

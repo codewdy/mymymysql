@@ -25,11 +25,22 @@ namespace TypeDB {
             RAISE(ColumnNotFound, name);
         return result;
     }
-    pObject Row::getObj(const std::string& tbl, const std::string& name) const {
-        return objs[desc->getIndex(tbl, name)];
+    pObject TableDesc::getObject(const std::vector<Row*>& rows, const std::string& tbl, const std::string& name) const {
+        auto idx = getIndex(tbl, name);
+        for (auto& row : rows)
+            if (idx < row->objs.size())
+                return row->objs[idx];
+            else
+                idx -= row->objs.size();
+        //TODO
+        throw "Not Imp";
     }
-    pObject Row::getPrimary() const {
-        return objs[desc->primaryIndex];
+    pObject TableDesc::getObject(const Row& row, const std::string& tbl, const std::string& name) const {
+        auto idx = getIndex(tbl, name);
+        return row.objs[idx];
+    }
+    pObject TableDesc::getPrimary(const Row& row) const {
+        return row.objs[primaryIndex];
     }
     std::vector<pObject> Table::getVec(const std::string& tbl, const std::string& name) const {
         std::size_t index = desc.getIndex(tbl, name);

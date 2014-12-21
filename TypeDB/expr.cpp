@@ -2,28 +2,28 @@
 #include "Exception/Exception.hpp"
 
 namespace TypeDB {
-    pObject Expr::Calc(const Row& row) {
+    pObject Expr::Calc(const TableDesc& desc, const Row& row) {
         RAISE(Syntax);
     }
 
-    bool Expr::CalcBool(const Row& row) {
+    bool Expr::CalcBool(const TableDesc& desc, const Row& row) {
         RAISE(Syntax);
     }
 
     Expr::~Expr() {}
 
-    pObject LiteralExpr::Calc(const Row& row) {
+    pObject LiteralExpr::Calc(const TableDesc& desc, const Row& row) {
         return Literal;
     }
 
-    pObject ReadExpr::Calc(const Row& row) {
-        return row.getObj(tbl, name);
+    pObject ReadExpr::Calc(const TableDesc& desc, const Row& row) {
+        return desc.getObject(row, tbl, name);
     }
 
-    bool UnaryExpr::CalcBool(const Row& row) {
+    bool UnaryExpr::CalcBool(const TableDesc& desc, const Row& row) {
         switch (op) {
             case Not:
-                return !l->CalcBool(row);
+                return !l->CalcBool(desc, row);
                 break;
         }
     }
@@ -32,16 +32,15 @@ namespace TypeDB {
 
 #define CALC2BOOL(op) \
         {\
-            bool lhs = l->CalcBool(row), rhs = r->CalcBool(row);\
+            bool lhs = l->CalcBool(desc, row), rhs = r->CalcBool(desc, row);\
             return lhs op rhs;\
         }
 #define CALC2OBJ(op) \
         {\
-            pObject lhs = l->Calc(row), rhs = r->Calc(row);\
+            pObject lhs = l->Calc(desc, row), rhs = r->Calc(desc, row);\
             return lhs->op_##op(rhs);\
         }
-    pObject BinaryExpr::Calc(const Row& row) {
-        pObject lhs = l->Calc(row), rhs = r->Calc(row);
+    pObject BinaryExpr::Calc(const TableDesc& desc, const Row& row) {
         switch (op) {
             case Plus:
                 CALC2OBJ(add);
@@ -53,8 +52,7 @@ namespace TypeDB {
         }
     }
 
-    bool BinaryExpr::CalcBool(const Row& row) {
-        pObject lhs, rhs;
+    bool BinaryExpr::CalcBool(const TableDesc& desc, const Row& row) {
         switch (op) {
             case Equal:
                 CALC2OBJ(eq);

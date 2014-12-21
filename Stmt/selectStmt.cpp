@@ -7,7 +7,7 @@ namespace Stmt {
         if (where) {
             std::vector<TypeDB::Row> rows;
             for (auto row : tbl.rows)
-                if (where->CalcBool(row))
+                if (where->CalcBool(tbl.desc, row))
                     rows.push_back(std::move(row));
             tbl.rows.swap(rows);
         }

@@ -4,21 +4,21 @@
 
 namespace TypeDB {
     struct Expr {
-        virtual pObject Calc(const Row& row);
-        virtual bool CalcBool(const Row& row);
+        virtual pObject Calc(const TableDesc& desc, const Row& row);
+        virtual bool CalcBool(const TableDesc& desc, const Row& row);
         virtual ~Expr();
     };
     struct LiteralExpr : public Expr {
         pObject Literal;
         LiteralExpr(const pObject& l) : Literal(l) {}
         LiteralExpr(pObject&& l) : Literal(std::move(l)) {}
-        virtual pObject Calc(const Row& row);
+        virtual pObject Calc(const TableDesc& desc, const Row& row);
     };
     struct ReadExpr : public Expr {
         std::string tbl, name;
         ReadExpr(const std::string& _tbl, const std::string& _name) : tbl(_tbl), name(_name) {}
         ReadExpr(const std::string& _name) : tbl(""), name(_name) {}
-        virtual pObject Calc(const Row& row);
+        virtual pObject Calc(const TableDesc& desc, const Row& row);
     };
     struct UnaryExpr : public Expr {
         Expr *l;
@@ -26,7 +26,7 @@ namespace TypeDB {
             Not,
         } op;
         UnaryExpr(Expr* _l, OpCode _op) : l(_l), op(_op) {}
-        virtual bool CalcBool(const Row& row);
+        virtual bool CalcBool(const TableDesc& desc, const Row& row);
         virtual ~UnaryExpr();
     };
     struct BinaryExpr : public Expr {
@@ -44,8 +44,8 @@ namespace TypeDB {
             Or,
         } op;
         BinaryExpr(Expr* _l, Expr* _r, OpCode _op) : l(_l), r(_r), op(_op) {}
-        virtual pObject Calc(const Row& row);
-        virtual bool CalcBool(const Row& row);
+        virtual pObject Calc(const TableDesc& desc, const Row& row);
+        virtual bool CalcBool(const TableDesc& desc, const Row& row);
         virtual ~BinaryExpr();
     };
 }

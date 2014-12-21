@@ -83,11 +83,10 @@ namespace Context {
             pgiter.Goto(v);
             auto buf = pgiter.Get();
             TypeDB::Row row;
-            row.desc = &ret.desc;
-            row.objs.resize(row.desc->descs.size());
+            row.objs.resize(ret.desc.descs.size());
             Utils::jumpWord(buf);
-            for (std::size_t i = 0; i < row.desc->descs.size(); i++)
-                row.objs[i] = row.desc->descs[i].type->CreateAndJump(buf);
+            for (std::size_t i = 0; i < ret.desc.descs.size(); i++)
+                row.objs[i] = ret.desc.descs[i].type->CreateAndJump(buf);
             ret.rows.push_back(std::move(row));
         }
         return ret;
@@ -108,7 +107,7 @@ namespace Context {
         for (const TypeDB::Row& row : tbl.rows) {
             char* eob = WriteRow(writeBuf, row);
             auto loc = Utils::writeFile(pgdb, tblFile, writeBuf, eob - writeBuf);
-            btree.set(row.getPrimary()->hash(), loc, true);
+            btree.set(tbl.desc.getPrimary(row)->hash(), loc, true);
         }
         delete [] writeBuf;
     }
@@ -118,7 +117,7 @@ namespace Context {
         PageDB::Iterator iter(pgdb, tblFile);
         char* writeBuf = new char[PageDB::PAGE_SIZE];
         for (const TypeDB::Row& row : tbl.rows) {
-            auto loc = btree.find(row.getPrimary()->hash());
+            auto loc = btree.find(tbl.desc.getPrimary(row)->hash());
             if (!loc.first) {
                 throw "Not Imp";
             }
@@ -128,7 +127,7 @@ namespace Context {
             char* eob = WriteRow(writeBuf, row);
             if (eob - writeBuf > size) {
                 auto new_loc = Utils::writeFile(pgdb, tblFile, writeBuf, eob - writeBuf);
-                btree.set(row.getPrimary()->hash(), new_loc, true);
+                btree.set(tbl.desc.getPrimary(row)->hash(), new_loc, true);
             } else {
                 memcpy(buf, writeBuf, eob - writeBuf);
             }
@@ -138,7 +137,7 @@ namespace Context {
     void Context::Delete(const std::string& tblName, const TypeDB::Table& tbl) {
         BTree::BTree btree(pgdb, tblidxFileName(tblName));
         for (const TypeDB::Row& row : tbl.rows) {
-            btree.remove(row.getPrimary()->hash());
+            btree.remove(tbl.desc.getPrimary(row)->hash());
         }
     }
     std::vector<std::string> Context::ReadDB() {

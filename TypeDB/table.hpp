@@ -16,19 +16,18 @@ namespace TypeDB {
                 return tbl + '.' + name;
         }
     };
+    struct Row {
+        std::vector<pObject> objs;
+        static Row merge(const Row& lhs, const Row& rhs);
+    };
     struct TableDesc {
         std::vector<ColDesc> descs;
         std::size_t primaryIndex;
         std::size_t getIndex(const std::string& tbl, const std::string& name) const;
-        std::size_t primaryKey() const;
+        pObject getObject(const std::vector<Row*>& rows, const std::string& tbl, const std::string& name) const;
+        pObject getObject(const Row& rows, const std::string& tbl, const std::string& name) const;
+        pObject getPrimary(const Row& row) const;
         static TableDesc merge(const TableDesc& lhs, const TableDesc& rhs);
-    };
-    struct Row {
-        std::vector<pObject> objs;
-        TableDesc* desc;
-        pObject getObj(const std::string& tbl, const std::string& name) const;
-        pObject getPrimary() const;
-        static Row merge(const Row& lhs, const Row& rhs);
     };
     struct Table {
         TableDesc desc;
