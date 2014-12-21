@@ -2,7 +2,7 @@
 #include "Exception/Exception.hpp"
 
 namespace TypeDB {
-    std::size_t TableDesc::getIndex(const std::string& tbl, const std::string& name) const {
+    int TableDesc::getIndex(const std::string& tbl, const std::string& name, bool force) const {
         int result = -1;
         if (tbl == "") {
             for (std::size_t i = 0; i < descs.size(); i++) {
@@ -21,22 +21,30 @@ namespace TypeDB {
                 }
             }
         }
-        if (result == -1)
-            RAISE(ColumnNotFound, name);
+        if (result == -1) {
+            if (force)
+                return -1;
+            else
+                RAISE(ColumnNotFound, name);
+        }
         return result;
     }
-    pObject TableDesc::getObject(const std::vector<Row*>& rows, const std::string& tbl, const std::string& name) const {
-        auto idx = getIndex(tbl, name);
+    pObject TableDesc::getObject(const std::vector<Row*>& rows, const std::string& tbl, const std::string& name, bool force) const {
+        auto idx = getIndex(tbl, name, force);
+        if (idx == -1)
+            return nullptr;
         for (auto& row : rows)
-            if (idx < row->objs.size())
+            if (idx < (int)row->objs.size())
                 return row->objs[idx];
             else
                 idx -= row->objs.size();
         //TODO
         throw "Not Imp";
     }
-    pObject TableDesc::getObject(const Row& row, const std::string& tbl, const std::string& name) const {
-        auto idx = getIndex(tbl, name);
+    pObject TableDesc::getObject(const Row& row, const std::string& tbl, const std::string& name, bool force) const {
+        auto idx = getIndex(tbl, name, force);
+        if (idx == -1)
+            return nullptr;
         return row.objs[idx];
     }
     pObject TableDesc::getPrimary(const Row& row) const {

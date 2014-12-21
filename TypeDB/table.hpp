@@ -23,9 +23,9 @@ namespace TypeDB {
     struct TableDesc {
         std::vector<ColDesc> descs;
         std::size_t primaryIndex;
-        std::size_t getIndex(const std::string& tbl, const std::string& name) const;
-        pObject getObject(const std::vector<Row*>& rows, const std::string& tbl, const std::string& name) const;
-        pObject getObject(const Row& rows, const std::string& tbl, const std::string& name) const;
+        int getIndex(const std::string& tbl, const std::string& name, bool force = false) const;
+        pObject getObject(const std::vector<Row*>& rows, const std::string& tbl, const std::string& name, bool force = false) const;
+        pObject getObject(const Row& rows, const std::string& tbl, const std::string& name, bool force = false) const;
         pObject getPrimary(const Row& row) const;
         static TableDesc merge(const TableDesc& lhs, const TableDesc& rhs);
     };
