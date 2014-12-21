@@ -30,7 +30,7 @@ namespace Context {
             throw "Not Imp";
         }
     }
-    void Context::InitTable(const std::string& tblName, const TypeDB::TableDesc& desc) {
+    void Context::InitTable(const std::string& tblName, const TypeDB::TableDesc& desc) const {
         if (!dbNewTable(tblName)) {
             //TODO: throw a exception
             throw "Not Imp";
@@ -49,7 +49,7 @@ namespace Context {
         file->eof = PageDB::Location(file->newPage(), 0);
         file->writebackFileHeaderCore();
     }
-    TypeDB::TableDesc Context::GetTableDesc(const std::string& tblName) {
+    TypeDB::TableDesc Context::GetTableDesc(const std::string& tblName) const {
         auto file = pgdb->OpenFile(tblFileName(tblName));
         auto x = pgdb->GetSession(file, file->entryPageID);
         auto buf = x.buf();
@@ -66,13 +66,13 @@ namespace Context {
         }
         return std::move(ret);
     }
-    void Context::DropTable(const std::string& tblName) {
+    void Context::DropTable(const std::string& tblName) const {
         if (!dbRemoveTable(tblName)) {
             //TODO: throw a exception
             throw "Not Imp";
         }
     }
-    TypeDB::Table Context::GetTable(const std::string& tblName) {
+    TypeDB::Table Context::GetTable(const std::string& tblName) const {
         TypeDB::Table ret;
         ret.desc = GetTableDesc(tblName);
         BTree::BTree btree(pgdb, tblidxFileName(tblName));
@@ -99,7 +99,7 @@ namespace Context {
         Utils::writeWord(org_buf, buf - org_buf);
         return buf;
     }
-    void Context::Insert(const std::string& tblName, const TypeDB::Table& tbl) {
+    void Context::Insert(const std::string& tblName, const TypeDB::Table& tbl) const {
         PageDB::File* tblFile = pgdb->OpenFile(tblFileName(tblName));
         BTree::BTree btree(pgdb, tblidxFileName(tblName));
         PageDB::Iterator iter(pgdb, tblFile);
@@ -111,7 +111,7 @@ namespace Context {
         }
         delete [] writeBuf;
     }
-    void Context::Update(const std::string& tblName, const TypeDB::Table& tbl) {
+    void Context::Update(const std::string& tblName, const TypeDB::Table& tbl) const {
         PageDB::File* tblFile = pgdb->OpenFile(tblFileName(tblName));
         BTree::BTree btree(pgdb, tblidxFileName(tblName));
         PageDB::Iterator iter(pgdb, tblFile);
@@ -134,13 +134,13 @@ namespace Context {
         }
         delete [] writeBuf;
     }
-    void Context::Delete(const std::string& tblName, const TypeDB::Table& tbl) {
+    void Context::Delete(const std::string& tblName, const TypeDB::Table& tbl) const {
         BTree::BTree btree(pgdb, tblidxFileName(tblName));
         for (const TypeDB::Row& row : tbl.rows) {
             btree.remove(tbl.desc.getPrimary(row)->hash());
         }
     }
-    std::vector<std::string> Context::ReadDB() {
+    std::vector<std::string> Context::ReadDB() const {
         PageDB::File* dbFile = pgdb->OpenFile(dbFileName());
         PageDB::PageSession session = pgdb->GetSession(dbFile, dbFile->entryPageID);
         const char* buf = session.buf();
@@ -150,7 +150,7 @@ namespace Context {
             ret.push_back(Utils::readString(buf));
         return ret;
     }
-    void Context::WriteDB(const std::vector<std::string>& info) {
+    void Context::WriteDB(const std::vector<std::string>& info) const {
         PageDB::File* dbFile = pgdb->OpenFile(dbFileName());
         PageDB::PageWriteSession session = pgdb->GetWriteSession(dbFile, dbFile->entryPageID);
         char* buf = session.buf();
@@ -158,7 +158,7 @@ namespace Context {
         for (auto item : info)
             Utils::writeString(buf, item);
     }
-    bool Context::dbNewTable(const std::string& tblName) {
+    bool Context::dbNewTable(const std::string& tblName) const {
         auto x = ReadDB();
         for (std::size_t i = 0; i < x.size(); i++) {
             if (x[i] == tblName) {
@@ -169,7 +169,7 @@ namespace Context {
         WriteDB(x);
         return true;
     }
-    bool Context::dbRemoveTable(const std::string& tblName) {
+    bool Context::dbRemoveTable(const std::string& tblName) const {
         auto x = ReadDB();
         std::size_t p;
         for (p = 0; p < x.size(); p++) {
