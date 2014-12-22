@@ -8,6 +8,8 @@ int main() {
     std::remove("test.db");
     std::remove("test:wdy.db");
     std::remove("test:wdy.idx");
+    std::remove("test:wy.db");
+    std::remove("test:wy.idx");
     TypeDB::TableDesc desc;
     TypeDB::ColDesc col_desc1, col_desc2, col_desc3;
     col_desc1.type = TypeDB::intType;
@@ -20,7 +22,6 @@ int main() {
     desc.descs.push_back(col_desc2);
     desc.descs.push_back(col_desc3);
     desc.primaryIndex = 0;
-    ctx.InitTable("wdy", desc);
     TypeDB::Table tbl;
     tbl.desc = desc;
     TypeDB::Row row1, row2, row3;
@@ -36,12 +37,22 @@ int main() {
     tbl.rows.push_back(row1);
     tbl.rows.push_back(row2);
     tbl.rows.push_back(row3);
+    ctx.InitTable("wdy", desc);
     ctx.Insert("wdy", tbl);
+    ctx.InitTable("wy", desc);
+    ctx.Insert("wy", tbl);
     auto stmt = Parser::CreateAST("select wdy.W, D from wdy");
     stmt->Run(ctx);
     Parser::CreateAST("select * from wdy")->Run(ctx);
+    std::cout << std::endl;
     Parser::CreateAST("select sum(wdy.W), avg(W), min(W), max(W), sum(D) from wdy")->Run(ctx);
+    std::cout << std::endl;
     Parser::CreateAST("select * from wdy where wdy.W = 1 or wdy.D = \"wy\"")->Run(ctx);
+    std::cout << std::endl;
+    Parser::CreateAST("select * from wdy, wy where wdy.W = wy.W")->Run(ctx);
+    std::cout << std::endl;
+    Parser::CreateAST("select * from wdy, wy where wdy.W = wy.W and wdy.W = 1")->Run(ctx);
+    std::cout << std::endl;
     pgdb->StopSchedule();
     delete pgdb;
 }

@@ -18,7 +18,7 @@ namespace TypeDB {
 
     std::pair<bool, pObject> ReadExpr::Calc(const TableDesc& desc, const Row& row) {
         auto ret = desc.getObject(row, tbl, name, true);
-        if (ret.ref == nullptr)
+        if (ret.obj == nullptr)
             return std::make_pair(false, ret);
         else
             return std::make_pair(true, ret);

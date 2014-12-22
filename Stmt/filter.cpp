@@ -36,7 +36,7 @@ namespace Stmt {
             std::vector<TypeDB::Row> rows;
             for (auto& row : ret.rows) {
                 auto x = cond->CalcBool(ret.desc, row);
-                if (force && !x.first) {
+                if (!force && !x.first) {
                     //TODO
                     throw "Not Imp";
                 }
