@@ -41,6 +41,8 @@ int main() {
     ctx.Insert("wdy", tbl);
     ctx.InitTable("wy", desc);
     ctx.Insert("wy", tbl);
+    ctx.InitTable("happy", desc);
+    ctx.Insert("happy", tbl);
     auto stmt = Parser::CreateAST("select wdy.W, D from wdy");
     stmt->Run(ctx);
     Parser::CreateAST("select * from wdy")->Run(ctx);
@@ -52,6 +54,8 @@ int main() {
     Parser::CreateAST("select * from wdy, wy where wdy.W = wy.W")->Run(ctx);
     std::cout << std::endl;
     Parser::CreateAST("select * from wdy, wy where wdy.W = wy.W and wdy.W = 1")->Run(ctx);
+    std::cout << std::endl;
+    Parser::CreateAST("select * from wdy, wy, happy where wdy.W = wy.W and wdy.W = happy.W")->Run(ctx);
     std::cout << std::endl;
     pgdb->StopSchedule();
     delete pgdb;
