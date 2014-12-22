@@ -102,12 +102,13 @@ namespace Context {
     void Context::Insert(const std::string& tblName, const TypeDB::Table& tbl) const {
         PageDB::File* tblFile = pgdb->OpenFile(tblFileName(tblName));
         BTree::BTree btree(pgdb, tblidxFileName(tblName));
+        auto desc = GetTableDesc(tblName);
         PageDB::Iterator iter(pgdb, tblFile);
         char* writeBuf = new char[PageDB::PAGE_SIZE];
         for (const TypeDB::Row& row : tbl.rows) {
             char* eob = WriteRow(writeBuf, row);
             auto loc = Utils::writeFile(pgdb, tblFile, writeBuf, eob - writeBuf);
-            btree.set(tbl.desc.getPrimary(row)->hash(), loc, true);
+            btree.set(desc.getPrimary(row)->hash(), loc, true);
         }
         delete [] writeBuf;
     }

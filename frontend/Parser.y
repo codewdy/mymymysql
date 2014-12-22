@@ -12,6 +12,7 @@ RAISE(Syntax);
 #include "TypeDB/tblExpr.hpp"
 #include "Stmt/updateStmt.hpp"
 #include "Stmt/selectStmt.hpp"
+#include "Stmt/insertStmt.hpp"
 extern Lex curLex;
 }
 
@@ -65,6 +66,7 @@ namespace Parser {
 
 %type stmt {Stmt::Stmt*}
 stmt(A) ::= selectStmt(B). {*ret = A = B;}
+stmt(A) ::= insertStmt(B). {*ret = A = B;}
 //stmt(A) ::= updateStmt(B). {*ret = A = B;}
 
 %type selectStmt {Stmt::SelectStmt*}
@@ -72,6 +74,10 @@ stmt(A) ::= selectStmt(B). {*ret = A = B;}
 selectStmt(A) ::= selectClause(B) fromClause(C) . {A = B; A->from.swap(*C); delete C;}
 selectStmt(A) ::= selectStmt(B) whereClause(C) . {A = B; A->where = C;}
 selectStmt(A) ::= selectStmt(B) groupbyClause(C) . {A = B; A->groupby = C;}
+
+%type insertStmt {Stmt::InsertStmt*}
+%destructor insertStmt {delete $$;}
+insertStmt(A) ::= INSERT INTO IDENTIFIER(B) VALUES rows(C) . {A = new Stmt::InsertStmt; A->tbl.rows.swap(*C); A->tbl_name = *B; delete C;}
 
 %type selectClause {Stmt::SelectStmt*}
 %destructor selectClause {delete $$;}
@@ -145,6 +151,15 @@ expr(A) ::= expr(B) GE expr(C) . {A = new TypeDB::BinaryExpr(B, C, TypeDB::Binar
 expr(A) ::= expr(B) AND expr(C) . {A = new TypeDB::BinaryExpr(B, C, TypeDB::BinaryExpr::And);}
 expr(A) ::= expr(B) OR expr(C) . {A = new TypeDB::BinaryExpr(B, C, TypeDB::BinaryExpr::Or);}
 expr(A) ::= NOT expr(B) . {A = new TypeDB::UnaryExpr(B, TypeDB::UnaryExpr::Not);}
+
+%type rows {std::vector<TypeDB::Row>*}
+%destructor row {delete $$;}
+rows(A) ::= LLC row(C) RLC . {A = new std::vector<TypeDB::Row>; A->push_back(std::move(*C)); delete C;}
+rows(A) ::= rows(B) COMMA LLC row(C) RLC . {A = B; A->push_back(std::move(*C)); delete C;}
+
+%type row {TypeDB::Row*}
+row(A) ::= literal(C) . {A = new TypeDB::Row; A->objs.push_back(C);}
+row(A) ::= row(B) COMMA literal(C) . {A = B; A->objs.push_back(C);}
 
 %type literal {TypeDB::Object*}
 %destructor literal {delete $$;}

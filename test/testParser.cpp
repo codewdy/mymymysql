@@ -43,8 +43,8 @@ int main() {
     ctx.Insert("wy", tbl);
     ctx.InitTable("happy", desc);
     ctx.Insert("happy", tbl);
-    auto stmt = Parser::CreateAST("select wdy.W, D from wdy");
-    stmt->Run(ctx);
+    Parser::CreateAST("select wdy.W, D from wdy")->Run(ctx);
+    std::cout << std::endl;
     Parser::CreateAST("Select * from wdy")->Run(ctx);
     std::cout << std::endl;
     Parser::CreateAST("select SUM(wdy.W), avg(W), min(W), max(W), sum(D) from wdy")->Run(ctx);
@@ -57,6 +57,9 @@ int main() {
     std::cout << std::endl;
     Parser::CreateAST("select * from wdy, wy, happy where wdy.W = wy.W and wdy.W = happy.W")->Run(ctx);
     std::cout << std::endl;
+    Parser::CreateAST("insert into wdy values (0, \"XYZ\", \"ABC\")")->Run(ctx);
+    std::cout << std::endl;
+    Parser::CreateAST("Select * from wdy")->Run(ctx);
     pgdb->StopSchedule();
     delete pgdb;
 }

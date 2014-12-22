@@ -56,6 +56,9 @@ WHITESPACE           ([ \t]+)
 (?i:max)                        {BuildOp(MAX);}
 (?i:group)                      {BuildOp(GROUP);}
 (?i:by)                         {BuildOp(BY);}
+(?i:insert)                     {BuildOp(INSERT);}
+(?i:into)                       {BuildOp(INTO);}
+(?i:values)                     {BuildOp(VALUES);}
 
 {INTEGER}                       {BuildLex(INTEGER);}
 
