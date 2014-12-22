@@ -10,6 +10,8 @@ int main() {
     std::remove("test:wdy.idx");
     std::remove("test:wy.db");
     std::remove("test:wy.idx");
+    std::remove("test:happy.db");
+    std::remove("test:happy.idx");
     TypeDB::TableDesc desc;
     TypeDB::ColDesc col_desc1, col_desc2, col_desc3;
     col_desc1.type = TypeDB::intType;
