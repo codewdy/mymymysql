@@ -129,9 +129,7 @@ updateRule(A) ::= IDENTIFIER(B) EQ expr(C) . {A = new std::pair<std::string, Typ
 %type expr {TypeDB::Expr*}
 %destructor expr {delete $$;}
 //Literal Expr
-expr(A) ::= STRING(B) . {A = new TypeDB::LiteralExpr(TypeDB::StringType::Create(*B));}
-expr(A) ::= INTEGER(B) . {A = new TypeDB::LiteralExpr(TypeDB::IntType::Create(std::stoi(*B)));}
-expr(A) ::= NULL_ . {A = new TypeDB::LiteralExpr(TypeDB::NullType::Create());}
+expr(A) ::= literal(B) . {A = new TypeDB::LiteralExpr(B);}
 expr(A) ::= IDENTIFIER(B) . {A = new TypeDB::ReadExpr(*B);}
 expr(A) ::= IDENTIFIER(B) DOT IDENTIFIER(C) . {A = new TypeDB::ReadExpr(*B, *C);}
 //Simple Expr
@@ -147,3 +145,9 @@ expr(A) ::= expr(B) GE expr(C) . {A = new TypeDB::BinaryExpr(B, C, TypeDB::Binar
 expr(A) ::= expr(B) AND expr(C) . {A = new TypeDB::BinaryExpr(B, C, TypeDB::BinaryExpr::And);}
 expr(A) ::= expr(B) OR expr(C) . {A = new TypeDB::BinaryExpr(B, C, TypeDB::BinaryExpr::Or);}
 expr(A) ::= NOT expr(B) . {A = new TypeDB::UnaryExpr(B, TypeDB::UnaryExpr::Not);}
+
+%type literal {TypeDB::Object*}
+%destructor literal {delete $$;}
+literal(A) ::= STRING(B) . {A = TypeDB::StringType::Create(*B);}
+literal(A) ::= INTEGER(B) . {A = TypeDB::IntType::Create(std::stoi(*B));}
+literal(A) ::= NULL_ . {A = TypeDB::NullType::Create();}
