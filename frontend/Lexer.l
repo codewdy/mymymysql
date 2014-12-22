@@ -43,19 +43,19 @@ WHITESPACE           ([ \t]+)
 "<>"                            {BuildOp(NE);}
 "("                             {BuildOp(LLC);}
 ")"                             {BuildOp(RLC);}
-"not"                           {BuildOp(NOT);}
-"and"                           {BuildOp(AND);}
-"or"                            {BuildOp(OR);}
 "."                             {BuildOp(DOT);}
-"select"                        {BuildOp(SELECT);}
-"from"                          {BuildOp(FROM);}
-"where"                         {BuildOp(WHERE);}
-"sum"                           {BuildOp(SUM);}
-"avg"                           {BuildOp(AVG);}
-"min"                           {BuildOp(MIN);}
-"max"                           {BuildOp(MAX);}
-"group"                         {BuildOp(GROUP);}
-"by"                            {BuildOp(BY);}
+(?i:not)                        {BuildOp(NOT);}
+(?i:and)                        {BuildOp(AND);}
+(?i:or)                         {BuildOp(OR);}
+(?i:select)                     {BuildOp(SELECT);}
+(?i:from)                       {BuildOp(FROM);}
+(?i:where)                      {BuildOp(WHERE);}
+(?i:sum)                        {BuildOp(SUM);}
+(?i:avg)                        {BuildOp(AVG);}
+(?i:min)                        {BuildOp(MIN);}
+(?i:max)                        {BuildOp(MAX);}
+(?i:group)                      {BuildOp(GROUP);}
+(?i:by)                         {BuildOp(BY);}
 
 {INTEGER}                       {BuildLex(INTEGER);}
 

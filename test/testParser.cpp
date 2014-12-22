@@ -45,9 +45,9 @@ int main() {
     ctx.Insert("happy", tbl);
     auto stmt = Parser::CreateAST("select wdy.W, D from wdy");
     stmt->Run(ctx);
-    Parser::CreateAST("select * from wdy")->Run(ctx);
+    Parser::CreateAST("Select * from wdy")->Run(ctx);
     std::cout << std::endl;
-    Parser::CreateAST("select sum(wdy.W), avg(W), min(W), max(W), sum(D) from wdy")->Run(ctx);
+    Parser::CreateAST("select SUM(wdy.W), avg(W), min(W), max(W), sum(D) from wdy")->Run(ctx);
     std::cout << std::endl;
     Parser::CreateAST("select * from wdy where wdy.W = 1 or wdy.D = \"wy\"")->Run(ctx);
     std::cout << std::endl;
