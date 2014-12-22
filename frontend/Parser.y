@@ -67,13 +67,18 @@ namespace Parser {
 %type stmt {Stmt::Stmt*}
 stmt(A) ::= selectStmt(B). {*ret = A = B;}
 stmt(A) ::= insertStmt(B). {*ret = A = B;}
-//stmt(A) ::= updateStmt(B). {*ret = A = B;}
+stmt(A) ::= updateStmt(B). {*ret = A = B;}
 
 %type selectStmt {Stmt::SelectStmt*}
 %destructor selectStmt {delete $$;}
 selectStmt(A) ::= selectClause(B) fromClause(C) . {A = B; A->from.swap(*C); delete C;}
 selectStmt(A) ::= selectStmt(B) whereClause(C) . {A = B; A->where = C;}
 selectStmt(A) ::= selectStmt(B) groupbyClause(C) . {A = B; A->groupby = C;}
+
+%type updateStmt {Stmt::UpdateStmt*}
+%destructor updateStmt {delete $$;}
+updateStmt(A) ::= updateClause(B) whereClause(C) . {A = B; A->where = C;}
+updateStmt(A) ::= updateClause(B) . {A = B; A->where = nullptr;}
 
 %type insertStmt {Stmt::InsertStmt*}
 %destructor insertStmt {delete $$;}

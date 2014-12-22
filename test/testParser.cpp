@@ -63,6 +63,9 @@ int main() {
     std::cout << std::endl;
     Parser::CreateAST("Select * from wdy")->Run(ctx);
     std::cout << std::endl;
+    Parser::CreateAST("update wdy set D = D + \"...\" where W = 1")->Run(ctx);
+    Parser::CreateAST("Select * from wdy")->Run(ctx);
+    std::cout << std::endl;
     try {
         Parser::CreateAST("insert into wdy values (0, \"XYZ\", \"ABC\")")->Run(ctx);
     } catch (const char* str) {
@@ -75,6 +78,16 @@ int main() {
     }
     try {
         Parser::CreateAST("insert into wdy values (0, 1, \"ABC\")")->Run(ctx);
+    } catch (const char* str) {
+        std::cout << str << std::endl;
+    }
+    try {
+        Parser::CreateAST("update wdy set D = 1")->Run(ctx);
+    } catch (const char* str) {
+        std::cout << str << std::endl;
+    }
+    try {
+        Parser::CreateAST("update wdy set W = 1")->Run(ctx);
     } catch (const char* str) {
         std::cout << str << std::endl;
     }

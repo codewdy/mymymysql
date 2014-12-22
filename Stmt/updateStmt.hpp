@@ -7,6 +7,8 @@ namespace Stmt {
     struct UpdateStmt : public Stmt {
         std::string tbl;
         std::unordered_map<std::string, TypeDB::Expr*> rules;
+        TypeDB::Expr* where;
+        virtual void Run(Context::Context& ctx);
     };
 }
 #endif

@@ -59,6 +59,8 @@ WHITESPACE           ([ \t]+)
 (?i:insert)                     {BuildOp(INSERT);}
 (?i:into)                       {BuildOp(INTO);}
 (?i:values)                     {BuildOp(VALUES);}
+(?i:update)                     {BuildOp(UPDATE);}
+(?i:set)                        {BuildOp(SET);}
 
 {INTEGER}                       {BuildLex(INTEGER);}
 
