@@ -7,6 +7,7 @@ namespace TypeDB {
     struct Type {
         virtual void Jump(const char*& buf) = 0;
         virtual Object* CreateAndJump(const char*& buf) = 0;
+        virtual bool Test(Object* obj);
     };
     struct NullType {
         static Null* none;
@@ -23,6 +24,7 @@ namespace TypeDB {
         }
         virtual void Jump(const char*& buf);
         virtual Object* CreateAndJump(const char*& buf);
+        virtual bool Test(Object* obj);
     };
     struct StringType : public Type {
         static String* Create(const std::string& x) {
@@ -30,6 +32,7 @@ namespace TypeDB {
         }
         virtual void Jump(const char*& buf);
         virtual Object* CreateAndJump(const char*& buf);
+        virtual bool Test(Object* obj);
     };
     extern IntType* intType;
     extern StringType* stringType;

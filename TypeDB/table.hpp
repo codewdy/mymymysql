@@ -28,6 +28,7 @@ namespace TypeDB {
         pObject getObject(const Row& rows, const std::string& tbl, const std::string& name, bool force = false) const;
         pObject getPrimary(const Row& row) const;
         static TableDesc merge(const TableDesc& lhs, const TableDesc& rhs);
+        bool Test(const Row& row) const;
     };
     struct Table {
         TableDesc desc;

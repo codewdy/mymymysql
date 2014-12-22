@@ -103,6 +103,18 @@ namespace Context {
         PageDB::File* tblFile = pgdb->OpenFile(tblFileName(tblName));
         BTree::BTree btree(pgdb, tblidxFileName(tblName));
         auto desc = GetTableDesc(tblName);
+        //Test
+        for (auto& row : tbl.rows) {
+            if (!desc.Test(row)) {
+                //TODO
+                throw "Not Imp";
+            }
+            if (btree.find(desc.getPrimary(row)->hash()).first) {
+                //TODO
+                throw "Not Imp";
+            }
+        }
+        //Begin
         PageDB::Iterator iter(pgdb, tblFile);
         char* writeBuf = new char[PageDB::PAGE_SIZE];
         for (const TypeDB::Row& row : tbl.rows) {

@@ -14,6 +14,18 @@ namespace TypeDB {
     Object* StringType::CreateAndJump(const char*& buf) {
         return new String(Utils::readString(buf));
     }
+    bool Type::Test(Object* obj) {
+        //TODO
+        throw "Not Imp";
+    }
+    bool StringType::Test(Object* obj) {
+        auto r = dynamic_cast<String*>(obj);
+        return r;
+    }
+    bool IntType::Test(Object* obj) {
+        auto r = dynamic_cast<Int*>(obj);
+        return r;
+    }
     static IntType intTypeX;
     static StringType stringTypeX;
     static Null null;

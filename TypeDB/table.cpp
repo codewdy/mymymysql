@@ -65,6 +65,15 @@ namespace TypeDB {
         ret.descs.insert(ret.descs.end(), rhs.descs.begin(), rhs.descs.end());
         return std::move(ret);
     }
+    bool TableDesc::Test(const Row& row) const {
+        if (row.objs.size() != descs.size())
+            return false;
+        for (std::size_t i = 0; i < descs.size(); i++) {
+            if (!descs[i].type->Test(row.objs[i]))
+                return false;
+        }
+        return true;
+    }
     std::vector<pObject> Table::getVec(const std::string& tbl, const std::string& name) const {
         std::size_t index = desc.getIndex(tbl, name);
         std::vector<pObject> ret;

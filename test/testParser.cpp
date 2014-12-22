@@ -62,6 +62,22 @@ int main() {
     Parser::CreateAST("insert into wdy values (0, \"XYZ\", \"ABC\")")->Run(ctx);
     std::cout << std::endl;
     Parser::CreateAST("Select * from wdy")->Run(ctx);
+    std::cout << std::endl;
+    try {
+        Parser::CreateAST("insert into wdy values (0, \"XYZ\", \"ABC\")")->Run(ctx);
+    } catch (const char* str) {
+        std::cout << str << std::endl;
+    }
+    try {
+        Parser::CreateAST("insert into wdy values (0, 1, \"XYZ\", \"ABC\")")->Run(ctx);
+    } catch (const char* str) {
+        std::cout << str << std::endl;
+    }
+    try {
+        Parser::CreateAST("insert into wdy values (0, 1, \"ABC\")")->Run(ctx);
+    } catch (const char* str) {
+        std::cout << str << std::endl;
+    }
     pgdb->StopSchedule();
     delete pgdb;
 }
