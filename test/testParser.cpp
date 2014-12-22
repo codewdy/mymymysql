@@ -66,6 +66,9 @@ int main() {
     Parser::CreateAST("update wdy set D = D + \"...\" where W = 1")->Run(ctx);
     Parser::CreateAST("Select * from wdy")->Run(ctx);
     std::cout << std::endl;
+    Parser::CreateAST("delete from wdy where W = 1")->Run(ctx);
+    Parser::CreateAST("Select * from wdy")->Run(ctx);
+    std::cout << std::endl;
     try {
         Parser::CreateAST("insert into wdy values (0, \"XYZ\", \"ABC\")")->Run(ctx);
     } catch (const char* str) {

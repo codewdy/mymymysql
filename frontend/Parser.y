@@ -13,6 +13,7 @@ RAISE(Syntax);
 #include "Stmt/updateStmt.hpp"
 #include "Stmt/selectStmt.hpp"
 #include "Stmt/insertStmt.hpp"
+#include "Stmt/deleteStmt.hpp"
 extern Lex curLex;
 }
 
@@ -68,6 +69,7 @@ namespace Parser {
 stmt(A) ::= selectStmt(B). {*ret = A = B;}
 stmt(A) ::= insertStmt(B). {*ret = A = B;}
 stmt(A) ::= updateStmt(B). {*ret = A = B;}
+stmt(A) ::= deleteStmt(B). {*ret = A = B;}
 
 %type selectStmt {Stmt::SelectStmt*}
 %destructor selectStmt {delete $$;}
@@ -83,6 +85,11 @@ updateStmt(A) ::= updateClause(B) . {A = B; A->where = nullptr;}
 %type insertStmt {Stmt::InsertStmt*}
 %destructor insertStmt {delete $$;}
 insertStmt(A) ::= INSERT INTO IDENTIFIER(B) VALUES rows(C) . {A = new Stmt::InsertStmt; A->tbl.rows.swap(*C); A->tbl_name = *B; delete C;}
+
+%type deleteStmt {Stmt::DeleteStmt*}
+%destructor deleteStmt {delete $$;}
+deleteStmt(A) ::= DELETE FROM IDENTIFIER(B) . {A = new Stmt::DeleteStmt; A->tbl = *B; A->where = nullptr;}
+deleteStmt(A) ::= DELETE FROM IDENTIFIER(B) whereClause(C) . {A = new Stmt::DeleteStmt; A->tbl = *B; A->where = C;}
 
 %type selectClause {Stmt::SelectStmt*}
 %destructor selectClause {delete $$;}
