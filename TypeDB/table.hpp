@@ -9,6 +9,8 @@ namespace TypeDB {
     struct ColDesc {
         std::string tbl, name;
         Type* type;
+        ColDesc() {}
+        ColDesc(const std::string& _name, Type* _type) : name(_name), type(_type) {}
         std::string toString() {
             if (tbl.empty())
                 return name;
@@ -23,6 +25,8 @@ namespace TypeDB {
     struct TableDesc {
         std::vector<ColDesc> descs;
         std::size_t primaryIndex;
+        TableDesc() : primaryIndex(0) {}
+        void setPrimary(const std::string& name);
         int getIndex(const std::string& tbl, const std::string& name, bool force = false) const;
         pObject getObject(const std::vector<Row*>& rows, const std::string& tbl, const std::string& name, bool force = false) const;
         pObject getObject(const Row& rows, const std::string& tbl, const std::string& name, bool force = false) const;

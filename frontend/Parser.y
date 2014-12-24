@@ -14,6 +14,7 @@ RAISE(Syntax);
 #include "Stmt/selectStmt.hpp"
 #include "Stmt/insertStmt.hpp"
 #include "Stmt/deleteStmt.hpp"
+#include "Stmt/createTableStmt.hpp"
 extern Lex curLex;
 }
 
@@ -70,6 +71,7 @@ stmt(A) ::= selectStmt(B). {*ret = A = B;}
 stmt(A) ::= insertStmt(B). {*ret = A = B;}
 stmt(A) ::= updateStmt(B). {*ret = A = B;}
 stmt(A) ::= deleteStmt(B). {*ret = A = B;}
+stmt(A) ::= createTableStmt(B). {*ret = A = B;}
 
 %type selectStmt {Stmt::SelectStmt*}
 %destructor selectStmt {delete $$;}
@@ -90,6 +92,10 @@ insertStmt(A) ::= INSERT INTO IDENTIFIER(B) VALUES rows(C) . {A = new Stmt::Inse
 %destructor deleteStmt {delete $$;}
 deleteStmt(A) ::= DELETE FROM IDENTIFIER(B) . {A = new Stmt::DeleteStmt; A->tbl = *B; A->where = nullptr;}
 deleteStmt(A) ::= DELETE FROM IDENTIFIER(B) whereClause(C) . {A = new Stmt::DeleteStmt; A->tbl = *B; A->where = C;}
+
+%type createTableStmt {Stmt::CreateTableStmt*}
+%destructor deleteStmt {delete $$;}
+createTableStmt(A) ::= CREATE TABLE IDENTIFIER(B) LLC tblDesc(C) RLC . {A = new Stmt::CreateTableStmt; A->tbl = *B; A->desc = std::move(*C); delete C;}
 
 %type selectClause {Stmt::SelectStmt*}
 %destructor selectClause {delete $$;}
@@ -178,3 +184,15 @@ row(A) ::= row(B) COMMA literal(C) . {A = B; A->objs.push_back(C);}
 literal(A) ::= STRING(B) . {A = TypeDB::StringType::Create(*B);}
 literal(A) ::= INTEGER(B) . {A = TypeDB::IntType::Create(std::stoi(*B));}
 literal(A) ::= NULL_ . {A = TypeDB::NullType::Create();}
+
+%type type {TypeDB::Type*}
+%destructor type {delete $$;}
+type(A) ::= INT LLC INTEGER(B) RLC . {A = new TypeDB::IntType(std::stoi(*B));}
+type(A) ::= VARCHAR LLC INTEGER(B) RLC . {A = new TypeDB::StringType(std::stoi(*B));}
+type(A) ::= type(B) NOT NULL_ . {A = B; A->null_ = false;}
+
+%type tblDesc {TypeDB::TableDesc*}
+%destructor tblDesc {delete $$;}
+tblDesc(A) ::= IDENTIFIER(C) type(D) . {A = new TypeDB::TableDesc; A->descs.push_back(TypeDB::ColDesc(*C, D));}
+tblDesc(A) ::= tblDesc(B) COMMA IDENTIFIER(C) type(D) . {A = B; A->descs.push_back(TypeDB::ColDesc(*C, D));}
+tblDesc(A) ::= tblDesc(B) COMMA PRIMARY KEY IDENTIFIER(C) . {A = B; A->setPrimary(*C);}

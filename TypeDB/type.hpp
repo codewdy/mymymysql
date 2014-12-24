@@ -18,6 +18,7 @@ namespace TypeDB {
         virtual void Jump(const char*& buf) = 0;
         virtual Object* CreateAndJump(const char*& buf) = 0;
         virtual bool Test(Object* obj);
+        virtual ~Type(){}
     };
     struct NullType {
         static Null* none;

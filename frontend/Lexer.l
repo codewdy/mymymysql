@@ -63,6 +63,12 @@ WHITESPACE           ([ \t]+)
 (?i:set)                        {BuildOp(SET);}
 (?i:delete)                     {BuildOp(DELETE);}
 (?i:null)                       {BuildOp(NULL_);}
+(?i:int)                        {BuildOp(INT);}
+(?i:varchar)                    {BuildOp(VARCHAR);}
+(?i:create)                     {BuildOp(CREATE);}
+(?i:table)                      {BuildOp(TABLE);}
+(?i:primary)                    {BuildOp(PRIMARY);}
+(?i:key)                        {BuildOp(KEY);}
 
 {INTEGER}                       {BuildLex(INTEGER);}
 

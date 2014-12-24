@@ -39,11 +39,11 @@ int main() {
     tbl.rows.push_back(row1);
     tbl.rows.push_back(row2);
     tbl.rows.push_back(row3);
-    ctx.InitTable("wdy", desc);
+    Parser::CreateAST("Create Table wdy (W int(10), D Varchar(10), Y Varchar(10), Primary Key W)")->Run(ctx);
+    Parser::CreateAST("Create Table wy (W int(10), D Varchar(10), Y Varchar(10), Primary Key W)")->Run(ctx);
+    Parser::CreateAST("Create Table happy (W int(10), D Varchar(10), Y Varchar(10), Primary Key W)")->Run(ctx);
     ctx.Insert("wdy", tbl);
-    ctx.InitTable("wy", desc);
     ctx.Insert("wy", tbl);
-    ctx.InitTable("happy", desc);
     ctx.Insert("happy", tbl);
     Parser::CreateAST("select wdy.W, D from wdy")->Run(ctx);
     std::cout << std::endl;

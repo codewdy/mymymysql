@@ -54,6 +54,16 @@ namespace TypeDB {
             return nullptr;
         return row.objs[idx];
     }
+    void TableDesc::setPrimary(const std::string& name) {
+        for (std::size_t i = 0; i < descs.size(); i++) {
+            if (descs[i].name == name) {
+                primaryIndex = i;
+                return;
+            }
+        }
+        //TODO
+        throw "Not Imp";
+    }
     pObject TableDesc::getPrimary(const Row& row) const {
         return row.objs[primaryIndex];
     }
