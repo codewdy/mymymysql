@@ -21,7 +21,8 @@ namespace Context {
             //TODO: throw a exception
             throw "Not Imp";
         }
-        auto file = pgdb->OpenFile(tblFileName(tblName));
+        pgdb->InitFile(tblidxFileName(tblName));
+        auto file = pgdb->InitFile(tblFileName(tblName));
         auto x = pgdb->GetWriteSession(file, file->entryPageID);
         auto buf = x.buf();
         Utils::writeInt(buf, 1);

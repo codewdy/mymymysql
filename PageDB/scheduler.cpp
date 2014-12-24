@@ -28,6 +28,19 @@ namespace PageDB {
         }
         return file;
     }
+    File* Scheduler::InitFile(const std::string& fn) {
+        File*& file = fileIndex[fn];
+        if (file == nullptr) {
+            file = new File(fn);
+        } else {
+            auto beg = pageIndex.lower_bound(std::make_pair(file, 0));
+            auto end = pageIndex.upper_bound(std::make_pair(file, 0x3FFFFFFF));
+            for (auto iter = beg; iter != end; iter++)
+                iter->second->Useless();
+        }
+        file->initFile();
+        return file;
+    }
     PageDesc* Scheduler::GetPage(File* file, int page_id) {
         if (page_id < 0)
             return nullptr;

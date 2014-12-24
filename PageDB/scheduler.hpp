@@ -26,6 +26,7 @@ namespace PageDB {
             return running;
         }
         File* OpenFile(const std::string& fn);
+        File* InitFile(const std::string& fn);
         PageDesc* GetPage(File* file, int page_id);
         void RemovePage(File* file, int page_id);
         PageSession GetSession(File* file, int page_id);

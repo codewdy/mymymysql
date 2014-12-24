@@ -58,6 +58,13 @@ namespace PageDB {
             }
             ref_mutex.unlock();
         }
+        void Useless() {
+            ref_mutex.lock();
+            delete page;
+            page = nullptr;
+            dirty = false;
+            ref_mutex.unlock();
+        }
         ~PageDesc() {
             Release();
         }

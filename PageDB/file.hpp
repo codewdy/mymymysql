@@ -46,7 +46,6 @@ namespace PageDB {
         ~File() {
             raw.close();
         }
-    private:
         void initFile();
         void readFile();
     };
