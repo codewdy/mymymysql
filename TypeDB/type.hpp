@@ -7,6 +7,7 @@ namespace TypeDB {
     enum TypeEnum : unsigned char {
         IntEnum,
         StringEnum,
+        NullEnum,
         ErrorTypeEnum,
     };
     struct Type {
@@ -20,9 +21,6 @@ namespace TypeDB {
     struct NullType {
         static Null* none;
         static Null* Create() {
-            if (!none) {
-                none = new Null;
-            }
             return none;
         }
     };

@@ -59,7 +59,7 @@ int main() {
     std::cout << std::endl;
     Parser::CreateAST("select * from wdy, wy, happy where wdy.W = wy.W and wdy.W = happy.W")->Run(ctx);
     std::cout << std::endl;
-    Parser::CreateAST("insert into wdy values (0, \"XYZ\", \"ABC\")")->Run(ctx);
+    Parser::CreateAST("insert into wdy values (0, NULL, \"ABC\")")->Run(ctx);
     std::cout << std::endl;
     Parser::CreateAST("Select * from wdy")->Run(ctx);
     std::cout << std::endl;

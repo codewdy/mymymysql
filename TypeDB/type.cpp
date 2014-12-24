@@ -6,7 +6,7 @@ namespace TypeDB {
         Utils::jumpInt(buf);
     }
     Object* IntType::CreateAndJump(const char*& buf) {
-        std::size_t ret = Utils::readInt(buf);
+        int ret = Utils::readInt(buf);
         if (ret == 0x80000000)
             return NullType::none;
         return Create(ret);
@@ -15,7 +15,7 @@ namespace TypeDB {
         Utils::jumpString(buf);
     }
     Object* StringType::CreateAndJump(const char*& buf) {
-        std::size_t size = Utils::readInt(buf);
+        int size = Utils::readInt(buf);
         if (size == 0x80000000)
             return NullType::none;
         std::string ret(buf, buf + size);
@@ -27,10 +27,14 @@ namespace TypeDB {
         throw "Not Imp";
     }
     bool StringType::Test(Object* obj) {
+        if (obj == NullType::none)
+            return true;
         auto r = dynamic_cast<String*>(obj);
         return r;
     }
     bool IntType::Test(Object* obj) {
+        if (obj == NullType::none)
+            return true;
         auto r = dynamic_cast<Int*>(obj);
         return r;
     }

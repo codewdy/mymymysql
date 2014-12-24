@@ -62,6 +62,7 @@ WHITESPACE           ([ \t]+)
 (?i:update)                     {BuildOp(UPDATE);}
 (?i:set)                        {BuildOp(SET);}
 (?i:delete)                     {BuildOp(DELETE);}
+(?i:null)                       {BuildOp(NULL_);}
 
 {INTEGER}                       {BuildLex(INTEGER);}
 
