@@ -26,6 +26,8 @@ namespace TypeDB {
         virtual bool op_gt(Object* rhs);
         virtual bool op_le(Object* rhs);
         virtual bool op_ge(Object* rhs);
+        virtual void write(char*& buf);
+        virtual std::string toString();
     };
     struct Int : public Object {
         int raw;

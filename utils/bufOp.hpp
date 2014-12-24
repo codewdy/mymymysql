@@ -72,27 +72,27 @@ namespace Utils {
 
 
     inline std::string readString(const char*& buf) {
-        word len = readWord(buf);
+        word len = readInt(buf);
         std::string ret(buf, buf + len);
         buf += len;
         return ret;
     }
     inline std::string readString(char*& buf) {
-        word len = readWord(buf);
+        word len = readInt(buf);
         std::string ret(buf, buf + len);
         buf += len;
         return ret;
     }
     inline void jumpString(const char*& buf) {
-        word len = readWord(buf);
+        word len = readInt(buf);
         buf += len;
     }
     inline void jumpString(char*& buf) {
-        word len = readWord(buf);
+        word len = readInt(buf);
         buf += len;
     }
     inline void writeString(char*& buf, const std::string& v) {
-        writeWord(buf, v.size());
+        writeInt(buf, v.size());
         memcpy(buf, v.data(), v.size());
         buf += v.size();
     }

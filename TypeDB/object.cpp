@@ -75,6 +75,9 @@ namespace TypeDB {
     void Object::write(char*& buf) {
         RAISE(Syntax);
     }
+    void Null::write(char*& buf) {
+        Utils::writeInt(buf, 0x80000000);
+    }
     void Int::write(char*& buf) {
         Utils::writeInt(buf, raw);
     }
@@ -83,6 +86,9 @@ namespace TypeDB {
     }
     std::string Object::toString() {
         RAISE(Syntax);
+    }
+    std::string Null::toString() {
+        return "NULL";
     }
     std::string Int::toString() {
         return std::to_string(raw);
