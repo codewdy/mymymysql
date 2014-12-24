@@ -27,6 +27,7 @@ WHITESPACE           ([ \t]+)
 %option outfile="Lexer.cpp" HEADER-FILE="Lexer.h"
 %option c++
 %x S
+%x S2
 
 %%
 {WHITESPACE}                    {}
@@ -81,10 +82,19 @@ WHITESPACE           ([ \t]+)
 <S>"\\\\"                       {sb.push_back('\\');}
 <S>.                            {sb.push_back(YYText()[0]);}
 
-{IDENTIFIER}                    {BuildLex(IDENTIFIER);}
+<INITIAL>'                       {BEGIN S2; sb.clear();}
+<S2><<EOF>>                      {RAISE(Syntax);}
+<S2>'                            {BEGIN INITIAL; BuildStr(STRING);}
+<S2>"\\n"                        {sb.push_back('\n');}
+<S2>"\\t"                        {sb.push_back('\t');}
+<S2>"\\'"                        {sb.push_back('\'');}
+<S2>"\\\\"                       {sb.push_back('\\');}
+<S2>.                            {sb.push_back(YYText()[0]);}
 
-<<EOF>>                         {return 0;}
-.                               {RAISE(Syntax);}
+{IDENTIFIER}                     {BuildLex(IDENTIFIER);}
+
+<<EOF>>                          {return 0;}
+.                                {RAISE(Syntax);}
 %%
 
 int yyFlexLexer::yywrap() { return 1; }

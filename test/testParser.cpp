@@ -39,12 +39,12 @@ int main() {
     tbl.rows.push_back(row1);
     tbl.rows.push_back(row2);
     tbl.rows.push_back(row3);
-    Parser::CreateAST("Create Table wdy (W int(10), D Varchar(10), Y Varchar(10), Primary Key W)")->Run(ctx);
-    Parser::CreateAST("Create Table wy (W int(10), D Varchar(10), Y Varchar(10), Primary Key W)")->Run(ctx);
-    Parser::CreateAST("Create Table happy (W int(10), D Varchar(10), Y Varchar(10), Primary Key W)")->Run(ctx);
-    ctx.Insert("wdy", tbl);
-    ctx.Insert("wy", tbl);
-    ctx.Insert("happy", tbl);
+    Parser::CreateAST("Create Table wdy (W int(10), D Varchar(10), Y Varchar(10) Not Null, Primary Key W)")->Run(ctx);
+    Parser::CreateAST("Create Table wy (W int(10), D Varchar(10), Y Varchar(10) Not Null, Primary Key W)")->Run(ctx);
+    Parser::CreateAST("Create Table happy (W int(10), D Varchar(10), Y Varchar(10) Not Null, Primary Key W)")->Run(ctx);
+    Parser::CreateAST("insert into wdy values (1, 'wdy', 'abc'), (2, 'wy', 'lo'), (3, 'XYZ', 've')")->Run(ctx);
+    Parser::CreateAST("insert into wy values (1, 'wdy', 'abc'), (2, 'wy', 'lo'), (3, 'XYZ', 've')")->Run(ctx);
+    Parser::CreateAST("insert into happy values (1, 'wdy', 'abc'), (2, 'wy', 'lo'), (3, 'XYZ', 've')")->Run(ctx);
     Parser::CreateAST("select wdy.W, D from wdy")->Run(ctx);
     std::cout << std::endl;
     Parser::CreateAST("Select * from wdy")->Run(ctx);
@@ -71,31 +71,37 @@ int main() {
     std::cout << std::endl;
     try {
         Parser::CreateAST("insert into wdy values (0, \"XYZ\", \"ABC\")")->Run(ctx);
+        std::cout << "ERROR" << std::endl;
     } catch (const char* str) {
         std::cout << str << std::endl;
     }
     try {
         Parser::CreateAST("insert into wdy values (0, 1, \"XYZ\", \"ABC\")")->Run(ctx);
+        std::cout << "ERROR" << std::endl;
     } catch (const char* str) {
         std::cout << str << std::endl;
     }
     try {
         Parser::CreateAST("insert into wdy values (0, 1, \"ABC\")")->Run(ctx);
+        std::cout << "ERROR" << std::endl;
     } catch (const char* str) {
         std::cout << str << std::endl;
     }
     try {
-        Parser::CreateAST("insert into wdy values (0, \"ABC\", NULL)")->Run(ctx);
+        Parser::CreateAST("insert into wdy values (5, \"ABC\", NULL)")->Run(ctx);
+        std::cout << "ERROR" << std::endl;
     } catch (const char* str) {
         std::cout << str << std::endl;
     }
     try {
         Parser::CreateAST("update wdy set D = 1")->Run(ctx);
+        std::cout << "ERROR" << std::endl;
     } catch (const char* str) {
         std::cout << str << std::endl;
     }
     try {
         Parser::CreateAST("update wdy set W = 1")->Run(ctx);
+        std::cout << "ERROR" << std::endl;
     } catch (const char* str) {
         std::cout << str << std::endl;
     }
