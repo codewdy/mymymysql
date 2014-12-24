@@ -26,10 +26,9 @@ namespace TypeDB {
         auto r = dynamic_cast<Int*>(obj);
         return r;
     }
-    static IntType intTypeX;
-    static StringType stringTypeX;
     static Null null;
     Null* NullType::none = &null;
-    IntType* intType = &intTypeX;
-    StringType* stringType = &stringTypeX;
+    Type* createIntType(int _desc) {return new IntType(_desc);}
+    Type* createStringType(int _desc) {return new StringType(_desc);}
+    TypeCreator typeCreators[ErrorTypeEnum] = {createIntType, createStringType};
 }

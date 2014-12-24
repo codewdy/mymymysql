@@ -14,9 +14,9 @@ int main() {
     std::remove("test:happy.idx");
     TypeDB::TableDesc desc;
     TypeDB::ColDesc col_desc1, col_desc2, col_desc3;
-    col_desc1.type = TypeDB::intType;
-    col_desc2.type = TypeDB::stringType;
-    col_desc3.type = TypeDB::stringType;
+    col_desc1.type = new TypeDB::IntType(3);
+    col_desc2.type = new TypeDB::StringType(3);
+    col_desc3.type = new TypeDB::StringType(3);
     col_desc1.name = "W";
     col_desc2.name = "D";
     col_desc3.name = "Y";

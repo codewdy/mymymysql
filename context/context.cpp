@@ -5,30 +5,14 @@
 
 namespace Context {
     typedef std::pair<TypeDB::Type*, std::string> colTypeDesc;
-    enum TypeEnum : Utils::byte {
-        IntEnum,
-        StringEnum,
-    };
     static TypeDB::Type* readType(const char*& buf) {
-        switch (Utils::readByte(buf)) {
-            case IntEnum:
-                return TypeDB::intType;
-            case StringEnum:
-                return TypeDB::stringType;
-            default:
-                //TODO
-                throw "Not Imp";
-        }
+        TypeDB::TypeEnum type = (TypeDB::TypeEnum)Utils::readByte(buf);
+        int desc = Utils::readInt(buf);
+        return TypeDB::typeCreators[type](desc);
     }
     static void writeType(char*& buf, TypeDB::Type* desc) {
-        if (desc == TypeDB::intType) {
-            Utils::writeByte(buf, IntEnum);
-        } else if (desc == TypeDB::stringType) {
-            Utils::writeByte(buf, StringEnum);
-        } else {
-            //TODO
-            throw "Not Imp";
-        }
+        Utils::writeByte(buf, desc->type);
+        Utils::writeInt(buf, desc->desc);
     }
     void Context::InitTable(const std::string& tblName, const TypeDB::TableDesc& desc) const {
         if (!dbNewTable(tblName)) {
