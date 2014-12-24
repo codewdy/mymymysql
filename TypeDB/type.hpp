@@ -12,8 +12,9 @@ namespace TypeDB {
     };
     struct Type {
         int desc;
+        bool null_;
         TypeEnum type;
-        Type(int _desc = 0, TypeEnum _type = ErrorTypeEnum) : desc(_desc), type(_type) {}
+        Type(int _desc = 0, bool _null_ = true, TypeEnum _type = ErrorTypeEnum) : desc(_desc), null_(_null_), type(_type) {}
         virtual void Jump(const char*& buf) = 0;
         virtual Object* CreateAndJump(const char*& buf) = 0;
         virtual bool Test(Object* obj);
@@ -28,7 +29,7 @@ namespace TypeDB {
         static Int* Create(int x) {
             return new Int(x);
         }
-        IntType(int _desc) : Type(_desc, IntEnum) {}
+        IntType(int _desc, bool _null_ = true) : Type(_desc, _null_, IntEnum) {}
         virtual void Jump(const char*& buf);
         virtual Object* CreateAndJump(const char*& buf);
         virtual bool Test(Object* obj);
@@ -37,13 +38,13 @@ namespace TypeDB {
         static String* Create(const std::string& x) {
             return new String(x);
         }
-        StringType(int _desc) : Type(_desc, StringEnum) {}
+        StringType(int _desc, bool _null_ = true) : Type(_desc, _null_, StringEnum) {}
         virtual void Jump(const char*& buf);
         virtual Object* CreateAndJump(const char*& buf);
         virtual bool Test(Object* obj);
     };
     void initTypes();
-    typedef Type* (*TypeCreator)(int _desc);
+    typedef Type* (*TypeCreator)(int _desc, bool _null_);
     extern TypeCreator typeCreators[ErrorTypeEnum];
 }
 

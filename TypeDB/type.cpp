@@ -28,19 +28,19 @@ namespace TypeDB {
     }
     bool StringType::Test(Object* obj) {
         if (obj == NullType::none)
-            return true;
+            return null_;
         auto r = dynamic_cast<String*>(obj);
         return r;
     }
     bool IntType::Test(Object* obj) {
         if (obj == NullType::none)
-            return true;
+            return null_;
         auto r = dynamic_cast<Int*>(obj);
         return r;
     }
     static Null null;
     Null* NullType::none = &null;
-    Type* createIntType(int _desc) {return new IntType(_desc);}
-    Type* createStringType(int _desc) {return new StringType(_desc);}
+    Type* createIntType(int _desc, bool _null_) {return new IntType(_desc, _null_);}
+    Type* createStringType(int _desc, bool _null_) {return new StringType(_desc, _null_);}
     TypeCreator typeCreators[ErrorTypeEnum] = {createIntType, createStringType};
 }

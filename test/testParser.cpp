@@ -16,7 +16,7 @@ int main() {
     TypeDB::ColDesc col_desc1, col_desc2, col_desc3;
     col_desc1.type = new TypeDB::IntType(3);
     col_desc2.type = new TypeDB::StringType(3);
-    col_desc3.type = new TypeDB::StringType(3);
+    col_desc3.type = new TypeDB::StringType(3, false);
     col_desc1.name = "W";
     col_desc2.name = "D";
     col_desc3.name = "Y";
@@ -81,6 +81,11 @@ int main() {
     }
     try {
         Parser::CreateAST("insert into wdy values (0, 1, \"ABC\")")->Run(ctx);
+    } catch (const char* str) {
+        std::cout << str << std::endl;
+    }
+    try {
+        Parser::CreateAST("insert into wdy values (0, \"ABC\", NULL)")->Run(ctx);
     } catch (const char* str) {
         std::cout << str << std::endl;
     }

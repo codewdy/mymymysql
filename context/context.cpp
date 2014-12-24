@@ -8,11 +8,13 @@ namespace Context {
     static TypeDB::Type* readType(const char*& buf) {
         TypeDB::TypeEnum type = (TypeDB::TypeEnum)Utils::readByte(buf);
         int desc = Utils::readInt(buf);
-        return TypeDB::typeCreators[type](desc);
+        bool null_ = desc & 0x80000000;
+        desc = desc & 0x3FFFFFFF;
+        return TypeDB::typeCreators[type](desc, null_);
     }
     static void writeType(char*& buf, TypeDB::Type* desc) {
         Utils::writeByte(buf, desc->type);
-        Utils::writeInt(buf, desc->desc);
+        Utils::writeInt(buf, desc->desc | ((int)desc->null_ << 31));
     }
     void Context::InitTable(const std::string& tblName, const TypeDB::TableDesc& desc) const {
         if (!dbNewTable(tblName)) {
@@ -109,6 +111,14 @@ namespace Context {
         delete [] writeBuf;
     }
     void Context::Update(const std::string& tblName, const TypeDB::Table& tbl) const {
+        //Test
+        auto desc = tbl.desc;
+        for (auto& row : tbl.rows) {
+            if (!desc.Test(row)) {
+                //TODO
+                throw "Not Imp";
+            }
+        }
         PageDB::File* tblFile = pgdb->OpenFile(tblFileName(tblName));
         BTree::BTree btree(pgdb, tblidxFileName(tblName));
         PageDB::Iterator iter(pgdb, tblFile);
