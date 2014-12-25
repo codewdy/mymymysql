@@ -15,6 +15,7 @@ RAISE(Syntax);
 #include "Stmt/insertStmt.hpp"
 #include "Stmt/deleteStmt.hpp"
 #include "Stmt/createTableStmt.hpp"
+#include "Stmt/dropTableStmt.hpp"
 extern Lex curLex;
 }
 
@@ -72,6 +73,7 @@ stmt(A) ::= insertStmt(B). {*ret = A = B;}
 stmt(A) ::= updateStmt(B). {*ret = A = B;}
 stmt(A) ::= deleteStmt(B). {*ret = A = B;}
 stmt(A) ::= createTableStmt(B). {*ret = A = B;}
+stmt(A) ::= dropTableStmt(B). {*ret = A = B;}
 
 %type selectStmt {Stmt::SelectStmt*}
 %destructor selectStmt {delete $$;}
@@ -94,8 +96,12 @@ deleteStmt(A) ::= DELETE FROM IDENTIFIER(B) . {A = new Stmt::DeleteStmt; A->tbl 
 deleteStmt(A) ::= DELETE FROM IDENTIFIER(B) whereClause(C) . {A = new Stmt::DeleteStmt; A->tbl = *B; A->where = C;}
 
 %type createTableStmt {Stmt::CreateTableStmt*}
-%destructor deleteStmt {delete $$;}
+%destructor createTableStmt {delete $$;}
 createTableStmt(A) ::= CREATE TABLE IDENTIFIER(B) LLC tblDesc(C) RLC . {A = new Stmt::CreateTableStmt; A->tbl = *B; A->desc = std::move(*C); delete C;}
+
+%type dropTableStmt {Stmt::DropTableStmt*}
+%destructor dropTableStmt {delete $$;}
+dropTableStmt(A) ::= DROP TABLE IDENTIFIER(B) . {A = new Stmt::DropTableStmt; A->tbl = *B;}
 
 %type selectClause {Stmt::SelectStmt*}
 %destructor selectClause {delete $$;}

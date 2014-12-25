@@ -69,7 +69,7 @@ int main() {
     Parser::CreateAST("delete from wdy where W = 1")->Run(ctx);
     Parser::CreateAST("Select * from wdy")->Run(ctx);
     std::cout << std::endl;
-    ctx.DropTable("happy");
+    Parser::CreateAST("Drop Table happy")->Run(ctx);
     Parser::CreateAST("Create Table happy (W int(10), D Varchar(10), Y Varchar(10) Not Null, Primary Key W)")->Run(ctx);
     Parser::CreateAST("insert into happy values (0, NULL, \"ABC\")")->Run(ctx);
     Parser::CreateAST("Select * from happy")->Run(ctx);

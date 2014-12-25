@@ -70,6 +70,7 @@ WHITESPACE           ([ \t]+)
 (?i:table)                      {BuildOp(TABLE);}
 (?i:primary)                    {BuildOp(PRIMARY);}
 (?i:key)                        {BuildOp(KEY);}
+(?i:drop)                       {BuildOp(DROP);}
 
 {INTEGER}                       {BuildLex(INTEGER);}
 
