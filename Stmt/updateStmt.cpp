@@ -3,6 +3,7 @@
 
 namespace Stmt {
     void UpdateStmt::Run(Context::Context& ctx) {
+        ctx.AssertTable(tbl);
         TypeDB::Table table = filter(ctx, tbl, where);
         for (auto& rule : rules) {
             int idx = table.desc.getIndex("", rule.first);

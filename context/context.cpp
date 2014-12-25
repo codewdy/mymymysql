@@ -86,6 +86,14 @@ namespace Context {
         Utils::writeWord(org_buf, buf - org_buf);
         return buf;
     }
+    void Context::AssertTable(const std::string& tblName) const {
+        auto tbls = ReadDB();
+        for (auto& tbl : tbls)
+            if (tbl == tblName)
+                return;
+        //TODO
+        throw "Not Imp";
+    }
     void Context::Insert(const std::string& tblName, const TypeDB::Table& tbl) const {
         PageDB::File* tblFile = pgdb->OpenFile(tblFileName(tblName));
         BTree::BTree btree(pgdb, tblidxFileName(tblName));

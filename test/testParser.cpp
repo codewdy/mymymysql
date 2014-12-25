@@ -110,6 +110,24 @@ int main() {
     } catch (const char* str) {
         std::cout << str << std::endl;
     }
+    try {
+        Parser::CreateAST("select * from happyC")->Run(ctx);
+        std::cout << "ERROR" << std::endl;
+    } catch (const char* str) {
+        std::cout << str << std::endl;
+    }
+    try {
+        Parser::CreateAST("update happyCC set D = 2")->Run(ctx);
+        std::cout << "ERROR" << std::endl;
+    } catch (const char* str) {
+        std::cout << str << std::endl;
+    }
+    try {
+        Parser::CreateAST("Drop Table ha")->Run(ctx);
+        std::cout << "ERROR" << std::endl;
+    } catch (const char* str) {
+        std::cout << str << std::endl;
+    }
     pgdb->StopSchedule();
     delete pgdb;
 }
