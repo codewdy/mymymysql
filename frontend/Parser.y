@@ -16,6 +16,7 @@ RAISE(Syntax);
 #include "Stmt/deleteStmt.hpp"
 #include "Stmt/createTableStmt.hpp"
 #include "Stmt/dropTableStmt.hpp"
+#include "Stmt/showTablesStmt.hpp"
 extern Lex curLex;
 }
 
@@ -74,6 +75,7 @@ stmt(A) ::= updateStmt(B). {*ret = A = B;}
 stmt(A) ::= deleteStmt(B). {*ret = A = B;}
 stmt(A) ::= createTableStmt(B). {*ret = A = B;}
 stmt(A) ::= dropTableStmt(B). {*ret = A = B;}
+stmt(A) ::= showTablesStmt(B). {*ret = A = B;}
 
 %type selectStmt {Stmt::SelectStmt*}
 %destructor selectStmt {delete $$;}
@@ -102,6 +104,10 @@ createTableStmt(A) ::= CREATE TABLE IDENTIFIER(B) LLC tblDesc(C) RLC . {A = new 
 %type dropTableStmt {Stmt::DropTableStmt*}
 %destructor dropTableStmt {delete $$;}
 dropTableStmt(A) ::= DROP TABLE IDENTIFIER(B) . {A = new Stmt::DropTableStmt; A->tbl = *B;}
+
+%type showTablesStmt {Stmt::ShowTablesStmt*}
+%destructor showTablesStmt {delete $$;}
+showTablesStmt(A) ::= SHOW TABLES . {A = new Stmt::ShowTablesStmt;}
 
 %type selectClause {Stmt::SelectStmt*}
 %destructor selectClause {delete $$;}

@@ -71,6 +71,8 @@ WHITESPACE           ([ \t]+)
 (?i:primary)                    {BuildOp(PRIMARY);}
 (?i:key)                        {BuildOp(KEY);}
 (?i:drop)                       {BuildOp(DROP);}
+(?i:show)                       {BuildOp(SHOW);}
+(?i:tables)                     {BuildOp(TABLES);}
 
 {INTEGER}                       {BuildLex(INTEGER);}
 

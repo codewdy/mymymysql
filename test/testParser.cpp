@@ -74,6 +74,8 @@ int main() {
     Parser::CreateAST("insert into happy values (0, NULL, \"ABC\")")->Run(ctx);
     Parser::CreateAST("Select * from happy")->Run(ctx);
     std::cout << std::endl;
+    Parser::CreateAST("Show Tables")->Run(ctx);
+    std::cout << std::endl;
     try {
         Parser::CreateAST("insert into wdy values (0, \"XYZ\", \"ABC\")")->Run(ctx);
         std::cout << "ERROR" << std::endl;
