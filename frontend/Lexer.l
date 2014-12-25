@@ -73,6 +73,8 @@ WHITESPACE           ([ \t]+)
 (?i:drop)                       {BuildOp(DROP);}
 (?i:show)                       {BuildOp(SHOW);}
 (?i:tables)                     {BuildOp(TABLES);}
+(?i:database)                   {BuildOp(DATABASE);}
+(?i:use)                        {BuildOp(USE);}
 
 {INTEGER}                       {BuildLex(INTEGER);}
 

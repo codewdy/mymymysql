@@ -95,6 +95,7 @@ namespace PageDB {
         unsigned short tmp = 0;
         raw.read((char*)&magic, 4);
         if (magic != MagicNumber) {
+            raw_mutex.unlock();
             initFile();
             return;
         }

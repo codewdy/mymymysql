@@ -17,6 +17,9 @@ RAISE(Syntax);
 #include "Stmt/createTableStmt.hpp"
 #include "Stmt/dropTableStmt.hpp"
 #include "Stmt/showTablesStmt.hpp"
+#include "Stmt/createDBStmt.hpp"
+#include "Stmt/dropDBStmt.hpp"
+#include "Stmt/useDBStmt.hpp"
 extern Lex curLex;
 }
 
@@ -76,6 +79,9 @@ stmt(A) ::= deleteStmt(B). {*ret = A = B;}
 stmt(A) ::= createTableStmt(B). {*ret = A = B;}
 stmt(A) ::= dropTableStmt(B). {*ret = A = B;}
 stmt(A) ::= showTablesStmt(B). {*ret = A = B;}
+stmt(A) ::= useStmt(B). {*ret = A = B;}
+stmt(A) ::= createDBStmt(B). {*ret = A = B;}
+stmt(A) ::= dropDBStmt(B). {*ret = A = B;}
 
 %type selectStmt {Stmt::SelectStmt*}
 %destructor selectStmt {delete $$;}
@@ -108,6 +114,18 @@ dropTableStmt(A) ::= DROP TABLE IDENTIFIER(B) . {A = new Stmt::DropTableStmt; A-
 %type showTablesStmt {Stmt::ShowTablesStmt*}
 %destructor showTablesStmt {delete $$;}
 showTablesStmt(A) ::= SHOW TABLES . {A = new Stmt::ShowTablesStmt;}
+
+%type useStmt {Stmt::UseDBStmt*}
+%destructor useStmt {delete $$;}
+useStmt(A) ::= USE IDENTIFIER(B) . {A = new Stmt::UseDBStmt(); A->db = *B;}
+
+%type createDBStmt {Stmt::CreateDBStmt*}
+%destructor createDBStmt {delete $$;}
+createDBStmt(A) ::= CREATE DATABASE IDENTIFIER(B) . {A = new Stmt::CreateDBStmt(); A->db = *B;}
+
+%type dropDBStmt {Stmt::DropDBStmt*}
+%destructor dropDBStmt {delete $$;}
+dropDBStmt(A) ::= DROP DATABASE IDENTIFIER(B) . {A = new Stmt::DropDBStmt(); A->db = *B;}
 
 %type selectClause {Stmt::SelectStmt*}
 %destructor selectClause {delete $$;}

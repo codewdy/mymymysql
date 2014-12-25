@@ -156,8 +156,8 @@ namespace Context {
             btree.remove(tbl.desc.getPrimary(row)->hash());
         }
     }
-    std::vector<std::string> Context::ReadDB() const {
-        PageDB::File* dbFile = pgdb->OpenFile(dbFileName());
+    std::vector<std::string> Context::ReadDB(const std::string& fn) const {
+        PageDB::File* dbFile = pgdb->OpenFile(fn);
         PageDB::PageSession session = pgdb->GetSession(dbFile, dbFile->entryPageID);
         const char* buf = session.buf();
         int size = Utils::readInt(buf);
@@ -166,13 +166,19 @@ namespace Context {
             ret.push_back(Utils::readString(buf));
         return ret;
     }
-    void Context::WriteDB(const std::vector<std::string>& info) const {
-        PageDB::File* dbFile = pgdb->OpenFile(dbFileName());
+    void Context::WriteDB(const std::string& fn, const std::vector<std::string>& info) const {
+        PageDB::File* dbFile = pgdb->OpenFile(fn);
         PageDB::PageWriteSession session = pgdb->GetWriteSession(dbFile, dbFile->entryPageID);
         char* buf = session.buf();
         Utils::writeInt(buf, info.size());
         for (auto& item : info)
             Utils::writeString(buf, item);
+    }
+    std::vector<std::string> Context::ReadDB() const {
+        return ReadDB(dbFileName());
+    }
+    void Context::WriteDB(const std::vector<std::string>& info) const {
+        return WriteDB(dbFileName(), info);
     }
     bool Context::dbNewTable(const std::string& tblName) const {
         auto x = ReadDB();
@@ -201,5 +207,56 @@ namespace Context {
         x.pop_back();
         WriteDB(x);
         return true;
+    }
+    void Context::UseDB(const std::string& _dbName) {
+        auto tbls = ReadDB(DBFilename);
+        for (auto& tbl : tbls)
+            if (_dbName == tbl) {
+                dbName = _dbName;
+                return;
+            }
+        //TODO
+        throw "Not Imp";
+    }
+    void Context::CreateDB(const std::string& _dbName) {
+        auto tbls = ReadDB(DBFilename);
+        for (auto& tbl : tbls)
+            if (_dbName == tbl) {
+                //TODO
+                throw "Not Imp";
+            }
+        pgdb->InitFile(_dbName + ".db");
+        tbls.push_back(_dbName);
+        WriteDB(DBFilename, tbls);
+    }
+    void Context::DropDB(const std::string& _dbName) {
+        if (_dbName == DefaultDB) {
+            //TODO
+            throw "Not Imp";
+        }
+        if (_dbName == dbName) {
+            //TODO
+            throw "Not Imp";
+        }
+        auto tbls = ReadDB(DBFilename);
+        for (auto& tbl : tbls)
+            if (_dbName == tbl) {
+                tbl = tbls.back();
+                tbls.pop_back();
+                WriteDB(DBFilename, tbls);
+                return;
+            }
+        //TODO
+        throw "Not Imp";
+    }
+    void Context::Init() {
+        auto tbls = ReadDB(DBFilename);
+        for (auto& tbl : tbls)
+            if (tbl == DefaultDB) {
+                return;
+            }
+        pgdb->InitFile(DefaultDB + ".db");
+        tbls.push_back(DefaultDB);
+        WriteDB(DBFilename, tbls);
     }
 }
