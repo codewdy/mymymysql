@@ -27,6 +27,7 @@ namespace TypeDB {
         std::size_t primaryIndex;
         TableDesc() : primaryIndex(0) {}
         void setPrimary(const std::string& name);
+        void setForeign(const std::string& name, const std::string& fT, const std::string& fK);
         int getIndex(const std::string& tbl, const std::string& name, bool force = false) const;
         pObject getObject(const std::vector<Row*>& rows, const std::string& tbl, const std::string& name, bool force = false) const;
         pObject getObject(const Row& rows, const std::string& tbl, const std::string& name, bool force = false) const;

@@ -10,11 +10,16 @@ namespace Context {
         int desc = Utils::readInt(buf);
         bool null_ = desc & 0x80000000;
         desc = desc & 0x3FFFFFFF;
-        return TypeDB::typeCreators[type](desc, null_);
+        auto ret = TypeDB::typeCreators[type](desc, null_);
+        ret->foreignTable = Utils::readString(buf);
+        ret->foreignKey = Utils::readString(buf);
+        return ret;
     }
     static void writeType(char*& buf, TypeDB::Type* desc) {
         Utils::writeByte(buf, desc->type);
         Utils::writeInt(buf, desc->desc | ((int)desc->null_ << 31));
+        Utils::writeString(buf, desc->foreignTable);
+        Utils::writeString(buf, desc->foreignKey);
     }
     void Context::InitTable(const std::string& tblName, const TypeDB::TableDesc& desc) const {
         if (!dbNewTable(tblName)) {
@@ -107,6 +112,18 @@ namespace Context {
             if (btree.find(desc.getPrimary(row)->hash()).first) {
                 //TODO
                 throw "Not Imp";
+            }
+        }
+        for (std::size_t i = 0; i < desc.descs.size(); i++) {
+            auto& descX = desc.descs[i];
+            if (descX.type->foreignTable != "") {
+                AssertTable(descX.type->foreignTable);
+                BTree::BTree btreeX(pgdb, tblidxFileName(descX.type->foreignTable));
+                for (auto& row : tbl.rows)
+                    if (!btreeX.find(row.objs[i]->hash()).first) {
+                        //TODO
+                        throw "Not Imp";
+                    }
             }
         }
         //Begin

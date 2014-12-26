@@ -75,6 +75,8 @@ WHITESPACE           ([ \t]+)
 (?i:tables)                     {BuildOp(TABLES);}
 (?i:database)                   {BuildOp(DATABASE);}
 (?i:use)                        {BuildOp(USE);}
+(?i:foreign)                    {BuildOp(FOREIGN);}
+(?i:references)                 {BuildOp(REFERENCES);}
 
 {INTEGER}                       {BuildLex(INTEGER);}
 

@@ -54,6 +54,17 @@ namespace TypeDB {
             return nullptr;
         return row.objs[idx];
     }
+    void TableDesc::setForeign(const std::string& name, const std::string& fT, const std::string& fK) {
+        for (std::size_t i = 0; i < descs.size(); i++) {
+            if (descs[i].name == name) {
+                descs[i].type->foreignTable = fT;
+                descs[i].type->foreignKey = fK;
+                return;
+            }
+        }
+        //TODO
+        throw "Not Imp";
+    }
     void TableDesc::setPrimary(const std::string& name) {
         for (std::size_t i = 0; i < descs.size(); i++) {
             if (descs[i].name == name) {

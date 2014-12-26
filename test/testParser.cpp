@@ -5,14 +5,7 @@ int main() {
     PageDB::Scheduler* pgdb = new PageDB::LRU_Scheduler;
     pgdb->StartSchedule();
     Context::Context ctx(pgdb);
-    std::remove("test.db");
-    std::remove("test:wdy.db");
-    std::remove("test:wdy.idx");
-    std::remove("test:wy.db");
-    std::remove("test:wy.idx");
-    std::remove("test:happy.db");
-    std::remove("test:happy.idx");
-    std::remove("DB.DB");
+    std::remove(Context::DBFilename.c_str());
     Parser::CreateAST("Create Table wdy (W int(10), D Varchar(10), Y Varchar(10) Not Null, Primary Key W)")->Run(ctx);
     Parser::CreateAST("Create Table wy (W int(10), D Varchar(10), Y Varchar(10) Not Null, Primary Key W)")->Run(ctx);
     Parser::CreateAST("Create Table happy (W int(10), D Varchar(10), Y Varchar(10) Not Null, Primary Key W)")->Run(ctx);
@@ -58,6 +51,16 @@ int main() {
     std::cout << std::endl;
     Parser::CreateAST("Show Tables")->Run(ctx);
     std::cout << std::endl;
+    Parser::CreateAST("create table fori (WX int(10), foreign key (WX) references happy(W))")->Run(ctx);
+    Parser::CreateAST("insert into fori values (1)")->Run(ctx);
+    Parser::CreateAST("Select * from fori")->Run(ctx);
+    std::cout << std::endl;
+    try {
+        Parser::CreateAST("insert into fori values (0)")->Run(ctx);
+        std::cout << "ERROR" << std::endl;
+    } catch (const char* str) {
+        std::cout << str << std::endl;
+    }
     try {
         Parser::CreateAST("insert into wdy values (0, \"XYZ\", \"ABC\")")->Run(ctx);
         std::cout << "ERROR" << std::endl;

@@ -22,7 +22,7 @@ namespace Context {
             return dbName + ".db";
         }
         Context(PageDB::Scheduler* _pgdb) : pgdb(_pgdb), dbName(DefaultDB) {Init();}
-        void InitTable(const std::string& tblName, const TypeDB::TableDesc& desc) const ;
+        void InitTable(const std::string& tblName, const TypeDB::TableDesc& desc) const;
         TypeDB::TableDesc GetTableDesc(const std::string& tblName) const;
         void DropTable(const std::string& tblName) const;
         TypeDB::Table GetTable(const std::string& tblName) const;

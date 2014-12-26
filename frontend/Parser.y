@@ -226,3 +226,4 @@ type(A) ::= type(B) NOT NULL_ . {A = B; A->null_ = false;}
 tblDesc(A) ::= IDENTIFIER(C) type(D) . {A = new TypeDB::TableDesc; A->descs.push_back(TypeDB::ColDesc(*C, D));}
 tblDesc(A) ::= tblDesc(B) COMMA IDENTIFIER(C) type(D) . {A = B; A->descs.push_back(TypeDB::ColDesc(*C, D));}
 tblDesc(A) ::= tblDesc(B) COMMA PRIMARY KEY IDENTIFIER(C) . {A = B; A->setPrimary(*C);}
+tblDesc(A) ::= tblDesc(B) COMMA FOREIGN KEY LLC IDENTIFIER(C) RLC REFERENCES IDENTIFIER(D) LLC IDENTIFIER(E) RLC . {A = B; A->setForeign(*C, *D, *E);}
