@@ -20,6 +20,7 @@ namespace TypeDB {
         virtual void Jump(const char*& buf) = 0;
         virtual Object* CreateAndJump(const char*& buf) = 0;
         virtual bool Test(Object* obj);
+        virtual std::string toString();
         virtual ~Type(){}
     };
     struct NullType {
@@ -35,6 +36,7 @@ namespace TypeDB {
         IntType(int _desc, bool _null_ = true) : Type(_desc, _null_, IntEnum) {}
         virtual void Jump(const char*& buf);
         virtual Object* CreateAndJump(const char*& buf);
+        virtual std::string toString();
         virtual bool Test(Object* obj);
     };
     struct StringType : public Type {
@@ -44,6 +46,7 @@ namespace TypeDB {
         StringType(int _desc, bool _null_ = true) : Type(_desc, _null_, StringEnum) {}
         virtual void Jump(const char*& buf);
         virtual Object* CreateAndJump(const char*& buf);
+        virtual std::string toString();
         virtual bool Test(Object* obj);
     };
     void initTypes();

@@ -38,6 +38,16 @@ namespace TypeDB {
         auto r = dynamic_cast<Int*>(obj);
         return r;
     }
+    std::string Type::toString() {
+        //TODO
+        throw "Not Imp";
+    }
+    std::string IntType::toString() {
+        return "INT(" + std::to_string(desc) + ")";
+    }
+    std::string StringType::toString() {
+        return "STRING(" + std::to_string(desc) + ")";
+    }
     static Null null;
     Null* NullType::none = &null;
     Type* createIntType(int _desc, bool _null_) {return new IntType(_desc, _null_);}

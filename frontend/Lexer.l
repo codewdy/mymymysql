@@ -77,6 +77,7 @@ WHITESPACE           ([ \t]+)
 (?i:use)                        {BuildOp(USE);}
 (?i:foreign)                    {BuildOp(FOREIGN);}
 (?i:references)                 {BuildOp(REFERENCES);}
+(?i:desc)                       {BuildOp(DESC);}
 
 {INTEGER}                       {BuildLex(INTEGER);}
 

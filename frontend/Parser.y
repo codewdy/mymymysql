@@ -20,6 +20,7 @@ RAISE(Syntax);
 #include "Stmt/createDBStmt.hpp"
 #include "Stmt/dropDBStmt.hpp"
 #include "Stmt/useDBStmt.hpp"
+#include "Stmt/descStmt.hpp"
 extern Lex curLex;
 }
 
@@ -82,6 +83,7 @@ stmt(A) ::= showTablesStmt(B). {*ret = A = B;}
 stmt(A) ::= useStmt(B). {*ret = A = B;}
 stmt(A) ::= createDBStmt(B). {*ret = A = B;}
 stmt(A) ::= dropDBStmt(B). {*ret = A = B;}
+stmt(A) ::= descStmt(B). {*ret = A = B;}
 
 %type selectStmt {Stmt::SelectStmt*}
 %destructor selectStmt {delete $$;}
@@ -126,6 +128,10 @@ createDBStmt(A) ::= CREATE DATABASE IDENTIFIER(B) . {A = new Stmt::CreateDBStmt(
 %type dropDBStmt {Stmt::DropDBStmt*}
 %destructor dropDBStmt {delete $$;}
 dropDBStmt(A) ::= DROP DATABASE IDENTIFIER(B) . {A = new Stmt::DropDBStmt(); A->db = *B;}
+
+%type descStmt {Stmt::descStmt*}
+%destructor descStmt {delete $$;}
+descStmt(A) ::= DESC IDENTIFIER(B) . {A = new Stmt::descStmt(); A->tbl = *B;}
 
 %type selectClause {Stmt::SelectStmt*}
 %destructor selectClause {delete $$;}

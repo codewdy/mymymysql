@@ -55,6 +55,8 @@ int main() {
     Parser::CreateAST("insert into fori values (1)")->Run(ctx);
     Parser::CreateAST("Select * from fori")->Run(ctx);
     std::cout << std::endl;
+    Parser::CreateAST("desc happy")->Run(ctx);
+    std::cout << std::endl;
     try {
         Parser::CreateAST("insert into fori values (0)")->Run(ctx);
         std::cout << "ERROR" << std::endl;
