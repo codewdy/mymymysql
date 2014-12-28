@@ -5,6 +5,20 @@
 namespace Stmt {
     void SelectStmt::Run(Context::Context& ctx) {
         auto tbl = filter(ctx, from, where);
+        if (groupby == nullptr)
+            Output(tbl);
+        else {
+            std::map<BTree::Key, std::vector<TypeDB::Row>> tbls;
+            for (auto& row : tbl.rows) {
+                tbls[groupby->Calc(tbl.desc, row).second->hash()].push_back(std::move(row));
+            }
+            for (auto& item : tbls) {
+                tbl.rows = std::move(item.second);
+                Output(tbl);
+            }
+        }
+    }
+    void SelectStmt::Output(const TypeDB::Table& tbl) {
         if (selectAll) {
             for (auto& row : tbl.rows) {
                 for (auto& item : row.objs)

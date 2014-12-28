@@ -8,6 +8,7 @@
 namespace Stmt {
     struct SelectStmt : public Stmt {
         virtual void Run(Context::Context& ctx);
+        void Output(const TypeDB::Table& tbl);
         std::vector<TypeDB::TblExpr*> select;
         bool selectAll;
         TypeDB::Expr* groupby;

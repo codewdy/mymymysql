@@ -47,6 +47,8 @@ int main() {
     Parser::CreateAST("Use X")->Run(ctx);
     Parser::CreateAST("Create Table happy (W int(10), D Varchar(10), Y Varchar(10) Not Null, Primary Key W)")->Run(ctx);
     Parser::CreateAST("insert into happy values (1, NULL, \"ABC\")")->Run(ctx);
+    Parser::CreateAST("insert into happy values (2, NULL, \"CBD\")")->Run(ctx);
+    Parser::CreateAST("insert into happy values (3, NULL, \"ABC\")")->Run(ctx);
     Parser::CreateAST("Select * from happy")->Run(ctx);
     std::cout << std::endl;
     Parser::CreateAST("Show Tables")->Run(ctx);
@@ -56,6 +58,10 @@ int main() {
     Parser::CreateAST("Select * from fori")->Run(ctx);
     std::cout << std::endl;
     Parser::CreateAST("desc happy")->Run(ctx);
+    std::cout << std::endl;
+    Parser::CreateAST("Select * from happy")->Run(ctx);
+    std::cout << std::endl;
+    Parser::CreateAST("Select Y, sum(W) from happy group by Y")->Run(ctx);
     std::cout << std::endl;
     try {
         Parser::CreateAST("insert into fori values (0)")->Run(ctx);
