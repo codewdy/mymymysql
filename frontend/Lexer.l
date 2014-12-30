@@ -78,6 +78,8 @@ WHITESPACE           ([ \t]+)
 (?i:foreign)                    {BuildOp(FOREIGN);}
 (?i:references)                 {BuildOp(REFERENCES);}
 (?i:desc)                       {BuildOp(DESC);}
+(?i:is)                         {BuildOp(IS);}
+(?i:like)                       {BuildOp(LIKE);}
 
 {INTEGER}                       {BuildLex(INTEGER);}
 

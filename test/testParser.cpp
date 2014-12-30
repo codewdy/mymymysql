@@ -6,9 +6,9 @@ int main() {
     pgdb->StartSchedule();
     Context::Context ctx(pgdb);
     std::remove(Context::DBFilename.c_str());
-    Parser::CreateAST("Create Table wdy (W int(10), D Varchar(10), Y Varchar(10) Not Null, Primary Key W)")->Run(ctx);
-    Parser::CreateAST("Create Table wy (W int(10), D Varchar(10), Y Varchar(10) Not Null, Primary Key W)")->Run(ctx);
-    Parser::CreateAST("Create Table happy (W int(10), D Varchar(10), Y Varchar(10) Not Null, Primary Key W)")->Run(ctx);
+    Parser::CreateAST("Create Table wdy (W int(10), D Varchar(10), Y Varchar(10) Not Null, Primary Key (W))")->Run(ctx);
+    Parser::CreateAST("Create Table wy (W int(10), D Varchar(10), Y Varchar(10) Not Null, Primary Key (W))")->Run(ctx);
+    Parser::CreateAST("Create Table happy (W int(10), D Varchar(10), Y Varchar(10) Not Null, Primary Key (W))")->Run(ctx);
     Parser::CreateAST("insert into wdy values (1, 'wdy', 'abc'), (2, 'wy', 'lo'), (3, 'XYZ', 've')")->Run(ctx);
     Parser::CreateAST("insert into wy values (1, 'wdy', 'abc'), (2, 'wy', 'lo'), (3, 'XYZ', 've')")->Run(ctx);
     Parser::CreateAST("insert into happy values (1, 'wdy', 'abc'), (2, 'wy', 'lo'), (3, 'XYZ', 've')")->Run(ctx);
@@ -37,7 +37,7 @@ int main() {
     Parser::CreateAST("Select * from wdy")->Run(ctx);
     std::cout << std::endl;
     Parser::CreateAST("Drop Table happy")->Run(ctx);
-    Parser::CreateAST("Create Table happy (W int(10), D Varchar(10), Y Varchar(10) Not Null, Primary Key W)")->Run(ctx);
+    Parser::CreateAST("Create Table happy (W int(10), D Varchar(10), Y Varchar(10) Not Null, Primary Key (W))")->Run(ctx);
     Parser::CreateAST("insert into happy values (0, NULL, \"ABC\")")->Run(ctx);
     Parser::CreateAST("Select * from happy")->Run(ctx);
     std::cout << std::endl;
@@ -45,10 +45,10 @@ int main() {
     std::cout << std::endl;
     Parser::CreateAST("Create Database X")->Run(ctx);
     Parser::CreateAST("Use X")->Run(ctx);
-    Parser::CreateAST("Create Table happy (W int(10), D Varchar(10), Y Varchar(10) Not Null, Primary Key W)")->Run(ctx);
+    Parser::CreateAST("Create Table happy (W int(10), D Varchar(10), Y Varchar(10) Not Null, Primary Key (W))")->Run(ctx);
     Parser::CreateAST("insert into happy values (1, NULL, \"ABC\")")->Run(ctx);
     Parser::CreateAST("insert into happy values (2, NULL, \"CBD\")")->Run(ctx);
-    Parser::CreateAST("insert into happy values (3, NULL, \"ABC\")")->Run(ctx);
+    Parser::CreateAST("insert into happy values (3, 'AB', \"ABC\")")->Run(ctx);
     Parser::CreateAST("Select * from happy")->Run(ctx);
     std::cout << std::endl;
     Parser::CreateAST("Show Tables")->Run(ctx);
@@ -62,6 +62,10 @@ int main() {
     Parser::CreateAST("Select * from happy")->Run(ctx);
     std::cout << std::endl;
     Parser::CreateAST("Select Y, sum(W) from happy group by Y")->Run(ctx);
+    std::cout << std::endl;
+    Parser::CreateAST("Select * from happy where Y like '%C'")->Run(ctx);
+    std::cout << std::endl;
+    Parser::CreateAST("Select * from happy where D is null")->Run(ctx);
     std::cout << std::endl;
     try {
         Parser::CreateAST("insert into fori values (0)")->Run(ctx);

@@ -202,9 +202,11 @@ expr(A) ::= expr(B) LT expr(C) . {A = new TypeDB::BinaryExpr(B, C, TypeDB::Binar
 expr(A) ::= expr(B) GT expr(C) . {A = new TypeDB::BinaryExpr(B, C, TypeDB::BinaryExpr::GreaterThan);}
 expr(A) ::= expr(B) LE expr(C) . {A = new TypeDB::BinaryExpr(B, C, TypeDB::BinaryExpr::LessEqual);}
 expr(A) ::= expr(B) GE expr(C) . {A = new TypeDB::BinaryExpr(B, C, TypeDB::BinaryExpr::GreaterEqual);}
+expr(A) ::= expr(B) LIKE expr(C) . {A = new TypeDB::BinaryExpr(B, C, TypeDB::BinaryExpr::Like);}
 expr(A) ::= expr(B) AND expr(C) . {A = new TypeDB::BinaryExpr(B, C, TypeDB::BinaryExpr::And);}
 expr(A) ::= expr(B) OR expr(C) . {A = new TypeDB::BinaryExpr(B, C, TypeDB::BinaryExpr::Or);}
 expr(A) ::= NOT expr(B) . {A = new TypeDB::UnaryExpr(B, TypeDB::UnaryExpr::Not);}
+expr(A) ::= expr(B) IS NULL_ . {A = new TypeDB::UnaryExpr(B, TypeDB::UnaryExpr::IsNull);}
 
 %type rows {std::vector<TypeDB::Row>*}
 %destructor row {delete $$;}

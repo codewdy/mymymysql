@@ -32,6 +32,12 @@ namespace TypeDB {
                     X.second = !X.second;
                     return X;
                 }
+            case IsNull:
+                {
+                    auto X = l->Calc(desc, row);
+                    Null* ptr = dynamic_cast<Null*>(X.second.obj);
+                    return std::make_pair(X.first, ptr != nullptr);
+                }
         }
     }
 
@@ -79,6 +85,8 @@ namespace TypeDB {
                 CALC2OBJ(le, false);
             case GreaterEqual:
                 CALC2OBJ(ge, false);
+            case Like:
+                CALC2OBJ(like, false);
             case And:
                 {
                     auto lhs = l->CalcBool(desc, row), rhs = r->CalcBool(desc, row);

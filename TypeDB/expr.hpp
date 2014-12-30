@@ -24,6 +24,7 @@ namespace TypeDB {
         Expr *l;
         enum OpCode {
             Not,
+            IsNull,
         } op;
         UnaryExpr(Expr* _l, OpCode _op) : l(_l), op(_op) {}
         virtual std::pair<bool, bool> CalcBool(const TableDesc& desc, const Row& row);
@@ -42,6 +43,7 @@ namespace TypeDB {
             GreaterEqual,
             And,
             Or,
+            Like,
         } op;
         BinaryExpr(Expr* _l, Expr* _r, OpCode _op) : l(_l), r(_r), op(_op) {}
         virtual std::pair<bool, pObject> Calc(const TableDesc& desc, const Row& row);

@@ -13,6 +13,8 @@ namespace TypeDB {
         virtual bool op_gt(Object* rhs);
         virtual bool op_le(Object* rhs);
         virtual bool op_ge(Object* rhs);
+        virtual bool op_like(Object* rhs);
+        virtual bool op_is_null(Object* rhs);
         virtual Object* op_add(Object* rhs);
         virtual Object* op_minus(Object* rhs);
         virtual BTree::Key hash();
@@ -26,7 +28,10 @@ namespace TypeDB {
         virtual bool op_gt(Object* rhs);
         virtual bool op_le(Object* rhs);
         virtual bool op_ge(Object* rhs);
+        virtual bool op_like(Object* rhs);
         virtual void write(char*& buf);
+        virtual bool op_is_null(Object* rhs);
+        virtual BTree::Key hash();
         virtual std::string toString();
     };
     struct Int : public Object {
@@ -59,6 +64,7 @@ namespace TypeDB {
         virtual bool op_gt(Object* rhs);
         virtual bool op_le(Object* rhs);
         virtual bool op_ge(Object* rhs);
+        virtual bool op_like(Object* rhs);
         virtual Object* op_add(Object* rhs);
         virtual BTree::Key hash();
         virtual void write(char*& buf);

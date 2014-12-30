@@ -1,6 +1,7 @@
 #include "Object.hpp"
 #include "Exception/Exception.hpp"
 #include "Utils/bufOp.hpp"
+#include <vector>
 
 namespace TypeDB {
 
@@ -11,6 +12,8 @@ namespace TypeDB {
     bool Object::op_gt(Object* rhs) {RAISE(Syntax);}
     bool Object::op_le(Object* rhs) {RAISE(Syntax);}
     bool Object::op_ge(Object* rhs) {RAISE(Syntax);}
+    bool Object::op_like(Object* rhs) {RAISE(Syntax);}
+    bool Object::op_is_null(Object* rhs) {return false;}
     Object* Object::op_add(Object* rhs) {RAISE(Syntax);}
     Object* Object::op_minus(Object* rhs) {RAISE(Syntax);}
 
@@ -23,6 +26,7 @@ namespace TypeDB {
     DEF_NULL_BOOL_OP(gt);
     DEF_NULL_BOOL_OP(le);
     DEF_NULL_BOOL_OP(ge);
+    DEF_NULL_BOOL_OP(like);
 
 
 #define DEF_BOOL_OP(type, op, opc) \
@@ -63,8 +67,38 @@ namespace TypeDB {
     DEF_BOOL_OP(String, ge, >=);
     DEF_OBJ_OP(String, add, +);
 
+    bool Null::op_is_null(Object* rhs) {return true;}
+
+    bool String::op_like(Object* rhs) {
+        String* _rhs = dynamic_cast<String*>(rhs);
+        if (_rhs == nullptr) {
+            throw "Type Check Error";
+        }
+        std::string& r = _rhs->raw;
+        std::vector<int> loc;
+        loc.push_back(0);
+        for (char x : r) {
+            if (loc.empty())
+                break;
+            std::vector<int> locX;
+            if (x == '%') {
+                for (int i = loc[0]; i <= raw.size(); i++)
+                    locX.push_back(i);
+            } else {
+                for (auto i : loc)
+                    if (i < raw.size() && raw[i] == x)
+                        locX.push_back(i + 1);
+            }
+            loc = std::move(locX);
+        }
+        return !loc.empty() && loc.back() == raw.size();
+    }
+
     BTree::Key Object::hash() {
         RAISE(Syntax);
+    }
+    BTree::Key Null::hash() {
+        return BTree::Key(0x19940319, 0x65766f6c, 0x19941102);
     }
     BTree::Key Int::hash() {
         return BTree::Key(raw);
