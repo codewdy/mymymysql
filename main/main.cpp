@@ -44,6 +44,8 @@ int main(int argc, char** argv) {
             std::string sql;
             std::cout << ">> ";
             std::getline(std::cin, sql);
+            if (!std::cin)
+                break;
             if (sql.substr(0, 4) == "exit")
                 break;
             RunStmt(sql, ctx);
