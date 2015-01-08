@@ -23,8 +23,7 @@ namespace Context {
     }
     void Context::InitTable(const std::string& tblName, const TypeDB::TableDesc& desc) const {
         if (!dbNewTable(tblName)) {
-            //TODO: throw a exception
-            throw "Not Imp";
+            throw "Table Already Exist";
         }
         pgdb->InitFile(tblidxFileName(tblName));
         auto file = pgdb->InitFile(tblFileName(tblName));
@@ -61,7 +60,7 @@ namespace Context {
     void Context::DropTable(const std::string& tblName) const {
         if (!dbRemoveTable(tblName)) {
             //TODO: throw a exception
-            throw "Not Imp";
+            throw "Table Not Found";
         }
     }
     TypeDB::Table Context::GetTable(const std::string& tblName) const {
@@ -96,8 +95,7 @@ namespace Context {
         for (auto& tbl : tbls)
             if (tbl == tblName)
                 return;
-        //TODO
-        throw "Not Imp";
+        throw "Table Not Found";
     }
     void Context::Insert(const std::string& tblName, const TypeDB::Table& tbl) const {
         PageDB::File* tblFile = pgdb->OpenFile(tblFileName(tblName));
@@ -106,12 +104,10 @@ namespace Context {
         //Test
         for (auto& row : tbl.rows) {
             if (!desc.Test(row)) {
-                //TODO
-                throw "Not Imp";
+                throw "Type Check Error";
             }
             if (btree.find(desc.getPrimary(row)->hash()).first) {
-                //TODO
-                throw "Not Imp";
+                throw "Primary Key Conflict";
             }
         }
         for (std::size_t i = 0; i < desc.descs.size(); i++) {
@@ -121,8 +117,7 @@ namespace Context {
                 BTree::BTree btreeX(pgdb, tblidxFileName(descX.type->foreignTable));
                 for (auto& row : tbl.rows)
                     if (!btreeX.find(row.objs[i]->hash()).first) {
-                        //TODO
-                        throw "Not Imp";
+                        throw "Foriegn Key Check Error";
                     }
             }
         }
@@ -141,8 +136,18 @@ namespace Context {
         auto desc = tbl.desc;
         for (auto& row : tbl.rows) {
             if (!desc.Test(row)) {
-                //TODO
-                throw "Not Imp";
+                throw "Type Check Error";
+            }
+        }
+        for (std::size_t i = 0; i < desc.descs.size(); i++) {
+            auto& descX = desc.descs[i];
+            if (descX.type->foreignTable != "") {
+                AssertTable(descX.type->foreignTable);
+                BTree::BTree btreeX(pgdb, tblidxFileName(descX.type->foreignTable));
+                for (auto& row : tbl.rows)
+                    if (!btreeX.find(row.objs[i]->hash()).first) {
+                        throw "Foriegn Key Check Error";
+                    }
             }
         }
         PageDB::File* tblFile = pgdb->OpenFile(tblFileName(tblName));
@@ -152,7 +157,7 @@ namespace Context {
         for (const TypeDB::Row& row : tbl.rows) {
             auto loc = btree.find(tbl.desc.getPrimary(row)->hash());
             if (!loc.first) {
-                throw "Not Imp";
+                throw "Cannnot Update Primary Key";
             }
             iter.Goto(loc.second);
             char* buf = iter.Get();
@@ -162,7 +167,7 @@ namespace Context {
                 auto new_loc = Utils::writeFile(pgdb, tblFile, writeBuf, eob - writeBuf);
                 btree.set(tbl.desc.getPrimary(row)->hash(), new_loc, true);
             } else {
-                memcpy(buf, writeBuf, eob - writeBuf);
+                memcpy(buf, writeBuf + 2, eob - writeBuf - 2);
             }
         }
         delete [] writeBuf;
@@ -232,15 +237,14 @@ namespace Context {
                 dbName = _dbName;
                 return;
             }
-        //TODO
-        throw "Not Imp";
+        throw "DB Not Found";
     }
     void Context::CreateDB(const std::string& _dbName) {
         auto tbls = ReadDB(DBFilename);
         for (auto& tbl : tbls)
             if (_dbName == tbl) {
                 //TODO
-                throw "Not Imp";
+                throw "Table Already Exist";
             }
         pgdb->InitFile(_dbName + ".db");
         tbls.push_back(_dbName);
@@ -249,11 +253,11 @@ namespace Context {
     void Context::DropDB(const std::string& _dbName) {
         if (_dbName == DefaultDB) {
             //TODO
-            throw "Not Imp";
+            throw "Permission Denined";
         }
         if (_dbName == dbName) {
             //TODO
-            throw "Not Imp";
+            throw "Cannot Drop Self";
         }
         auto tbls = ReadDB(DBFilename);
         for (auto& tbl : tbls)
@@ -264,7 +268,7 @@ namespace Context {
                 return;
             }
         //TODO
-        throw "Not Imp";
+        throw "DB Not Found";
     }
     void Context::Init() {
         auto tbls = ReadDB(DBFilename);

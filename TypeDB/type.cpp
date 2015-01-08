@@ -24,7 +24,7 @@ namespace TypeDB {
     }
     bool Type::Test(Object* obj) {
         //TODO
-        throw "Not Imp";
+        throw "Internal Error";
     }
     bool StringType::Test(Object* obj) {
         if (obj == NullType::none)
@@ -40,7 +40,7 @@ namespace TypeDB {
     }
     std::string Type::toString() {
         //TODO
-        throw "Not Imp";
+        throw "Internal Error";
     }
     std::string IntType::toString() {
         return "INT(" + std::to_string(desc) + ")";

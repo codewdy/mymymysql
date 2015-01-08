@@ -35,7 +35,7 @@ namespace PageDB {
         }
         virtual Location NextLocation() {
             //TODO: Not Imp
-            throw "Not Imp";
+            throw "Internal Error";
         }
         char& operator[](int idx) {
             return Get()[idx];
@@ -72,7 +72,7 @@ namespace PageDB {
         }
         virtual Location NextLocation() {
             //TODO: Not Imp
-            throw "Not Imp";
+            throw "Internal Error";
         }
         const char& operator[](int idx) {
             return Get()[idx];

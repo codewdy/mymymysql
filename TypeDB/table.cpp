@@ -17,7 +17,7 @@ namespace TypeDB {
                     if (result == -1)
                         result = i;
                     else
-                        RAISE(ColumnMultiFound, name);
+                        throw "ColumnMultiFound";
                 }
             }
         } else {
@@ -32,7 +32,7 @@ namespace TypeDB {
             if (force)
                 return -1;
             else
-                RAISE(ColumnNotFound, name);
+                throw "ColumnNotFound";
         }
         return result;
     }
@@ -45,8 +45,7 @@ namespace TypeDB {
                 return row->objs[idx];
             else
                 idx -= row->objs.size();
-        //TODO
-        throw "Not Imp";
+        throw "Column Not Found";
     }
     pObject TableDesc::getObject(const Row& row, const std::string& tbl, const std::string& name, bool force) const {
         auto idx = getIndex(tbl, name, force);
@@ -62,8 +61,7 @@ namespace TypeDB {
                 return;
             }
         }
-        //TODO
-        throw "Not Imp";
+        throw "Column Not Found";
     }
     void TableDesc::setPrimary(const std::string& name) {
         for (std::size_t i = 0; i < descs.size(); i++) {
@@ -73,7 +71,7 @@ namespace TypeDB {
             }
         }
         //TODO
-        throw "Not Imp";
+        throw "Column Not Found";
     }
     pObject TableDesc::getPrimary(const Row& row) const {
         return row.objs[primaryIndex];

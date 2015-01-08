@@ -3,11 +3,11 @@
 
 namespace TypeDB {
     std::pair<bool, pObject> Expr::Calc(const TableDesc& desc, const Row& row) {
-        RAISE(Syntax);
+        throw "Syntax Error";
     }
 
     std::pair<bool, bool> Expr::CalcBool(const TableDesc& desc, const Row& row) {
-        RAISE(Syntax);
+        throw "Syntax Error";
     }
 
     Expr::~Expr() {}
@@ -67,7 +67,7 @@ namespace TypeDB {
                 CALC2OBJ(minus, nullptr);
                 break;
             default:
-                RAISE(Syntax);
+                throw "Syntax Error";
         }
     }
 
@@ -112,7 +112,7 @@ namespace TypeDB {
                         return std::make_pair(rhs.second, rhs.second);
                 }
             default:
-                RAISE(Syntax);
+                throw "Syntax Error";
         }
     }
 

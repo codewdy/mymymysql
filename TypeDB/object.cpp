@@ -6,16 +6,16 @@
 namespace TypeDB {
 
     Object::~Object() {}
-    bool Object::op_eq(Object* rhs) {RAISE(Syntax);}
-    bool Object::op_ne(Object* rhs) {RAISE(Syntax);}
-    bool Object::op_lt(Object* rhs) {RAISE(Syntax);}
-    bool Object::op_gt(Object* rhs) {RAISE(Syntax);}
-    bool Object::op_le(Object* rhs) {RAISE(Syntax);}
-    bool Object::op_ge(Object* rhs) {RAISE(Syntax);}
-    bool Object::op_like(Object* rhs) {RAISE(Syntax);}
+    bool Object::op_eq(Object* rhs) {throw "Syntax Error";}
+    bool Object::op_ne(Object* rhs) {throw "Syntax Error";}
+    bool Object::op_lt(Object* rhs) {throw "Syntax Error";}
+    bool Object::op_gt(Object* rhs) {throw "Syntax Error";}
+    bool Object::op_le(Object* rhs) {throw "Syntax Error";}
+    bool Object::op_ge(Object* rhs) {throw "Syntax Error";}
+    bool Object::op_like(Object* rhs) {throw "Syntax Error";}
     bool Object::op_is_null(Object* rhs) {return false;}
-    Object* Object::op_add(Object* rhs) {RAISE(Syntax);}
-    Object* Object::op_minus(Object* rhs) {RAISE(Syntax);}
+    Object* Object::op_add(Object* rhs) {throw "Syntax Error";}
+    Object* Object::op_minus(Object* rhs) {throw "Syntax Error";}
 
 #define DEF_NULL_BOOL_OP(op) \
     bool Null::op_##op(Object* rhs) {return false;}
@@ -34,7 +34,7 @@ namespace TypeDB {
         type* _rhs = dynamic_cast<type*>(rhs);\
         if (_rhs == nullptr) {\
             if (dynamic_cast<Null*>(rhs) == nullptr)\
-                RAISE(Syntax);\
+                throw "Syntax Error";\
             else\
                 return false;\
         }\
@@ -45,7 +45,7 @@ namespace TypeDB {
     Object* type::op_##op(Object* rhs) {\
         type* _rhs = dynamic_cast<type*>(rhs);\
         if (_rhs == nullptr) {\
-            RAISE(Syntax);\
+            throw "Syntax Error";\
         }\
         return new type(raw opc _rhs->raw);\
     }
@@ -86,7 +86,7 @@ namespace TypeDB {
                     locX.push_back(i);
             } else {
                 for (auto i : loc)
-                    if (i < raw.size() && raw[i] == x)
+                    if (i < raw.size() && (raw[i] == x || x == '_'))
                         locX.push_back(i + 1);
             }
             loc = std::move(locX);
@@ -95,7 +95,7 @@ namespace TypeDB {
     }
 
     BTree::Key Object::hash() {
-        RAISE(Syntax);
+        throw "Syntax Error";
     }
     BTree::Key Null::hash() {
         return BTree::Key(0x19940319, 0x65766f6c, 0x19941102);
@@ -107,7 +107,7 @@ namespace TypeDB {
         return BTree::Key(raw);
     }
     void Object::write(char*& buf) {
-        RAISE(Syntax);
+        throw "Syntax Error";
     }
     void Null::write(char*& buf) {
         Utils::writeInt(buf, 0x80000000);
@@ -119,7 +119,7 @@ namespace TypeDB {
         Utils::writeString(buf, raw);
     }
     std::string Object::toString() {
-        RAISE(Syntax);
+        throw "Syntax Error";
     }
     std::string Null::toString() {
         return "NULL";

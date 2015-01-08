@@ -8,14 +8,12 @@ namespace Stmt {
         for (auto& rule : rules) {
             int idx = table.desc.getIndex("", rule.first);
             if (idx == table.desc.primaryIndex) {
-                //TODO
-                throw "Not Imp";
+                throw "Cannot Update Primary Key";
             }
             for (auto& row : table.rows) {
                 auto rst = rule.second->Calc(table.desc, row);
                 if (!table.desc.descs[idx].type->Test(rst.second.obj)) {
-                    //TODO
-                    throw "Not Imp";
+                    throw "Type Check Error";
                 }
                 row.objs[idx] = rst.second;
             }

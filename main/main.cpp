@@ -4,8 +4,16 @@
 #include <fstream>
 
 void RunStmt(const std::string& sql, Context::Context& ctx) {
-    auto X = Parser::CreateAST(sql);
-    X->Run(ctx);
+#ifndef DEBUG
+    try {
+#endif
+        auto X = Parser::CreateAST(sql);
+        X->Run(ctx);
+#ifndef DEBUG
+    } catch (const char* ex) {
+        std::cout << ex << std::endl;
+    }
+#endif
 }
 
 int main(int argc, char** argv) {
@@ -42,7 +50,7 @@ int main(int argc, char** argv) {
     } else {
         while (true) {
             std::string sql;
-            std::cout << ">> ";
+            std::cout << ctx.dbName << " >> ";
             std::getline(std::cin, sql);
             if (!std::cin)
                 break;

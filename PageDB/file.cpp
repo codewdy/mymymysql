@@ -11,8 +11,7 @@ namespace PageDB {
     int File::pageOffset(int vaddr) {
         auto iter = pageMap.find(vaddr);
         if (iter == pageMap.end()) {
-            //TODO
-            throw "Not Imp";
+            throw "Page Not Found";
         }
         //first page to save the file informations
         return (iter->second + 1) * PAGE_SIZE;
@@ -20,7 +19,7 @@ namespace PageDB {
     int File::newPage() {
         if (pageMap.size() >= MaxPage) {
             //TODO
-            throw "Not Imp";
+            throw "Page Overflow";
         }
         std::unordered_set<int> Vs;
         for (auto& item : pageMap) {
@@ -48,7 +47,7 @@ namespace PageDB {
         std::size_t count = pageMap.erase(pageid);
         if (count == 0) {
             //TODO
-            throw "Not Imp";
+            throw "Page Not Found";
         }
         writebackFileHeader();
     }

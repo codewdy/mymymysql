@@ -24,8 +24,7 @@ namespace Stmt {
         if (cond && !force) {
             for (auto& row : ret.rows)
                 if (!cond->CalcBool(ret.desc, row).first) {
-                    //TODO
-                    throw "Not Imp";
+                    throw "Column Not Found";
                 }
         }
         return std::move(ret);
@@ -37,8 +36,7 @@ namespace Stmt {
             for (auto& row : ret.rows) {
                 auto x = cond->CalcBool(ret.desc, row);
                 if (!force && !x.first) {
-                    //TODO
-                    throw "Not Imp";
+                    throw "Column Not Found";
                 }
                 if (!x.first || x.second)
                     rows.push_back(std::move(row));
@@ -54,8 +52,7 @@ namespace Stmt {
             for (auto& row : ret.rows) {
                 auto x = cond->CalcBool(ret.desc, row);
                 if (force && !x.first) {
-                    //TODO
-                    throw "Not Imp";
+                    throw "Column Not Found";
                 }
                 if (!x.first || x.second)
                     rows.push_back(std::move(row));

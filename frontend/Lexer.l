@@ -22,7 +22,7 @@ BuildOpX(X, new std::string(sb.begin(), sb.end()));\
 DIGIT                ([0-9])
 INTEGER              ({DIGIT}+)
 IDENTIFIER           ([_A-Za-z][_0-9A-Za-z]*)
-WHITESPACE           ([ \t]+)
+WHITESPACE           ([ \t\n\r]+)
 
 %option outfile="Lexer.cpp" HEADER-FILE="Lexer.h"
 %option c++
@@ -84,7 +84,7 @@ WHITESPACE           ([ \t]+)
 {INTEGER}                       {BuildLex(INTEGER);}
 
 <INITIAL>\"                     {BEGIN S; sb.clear();}
-<S><<EOF>>                      {RAISE(Syntax);}
+<S><<EOF>>                      {throw "Syntax Error";}
 <S>\"                           {BEGIN INITIAL; BuildStr(STRING);}
 <S>"\\n"                        {sb.push_back('\n');}
 <S>"\\t"                        {sb.push_back('\t');}
@@ -93,7 +93,7 @@ WHITESPACE           ([ \t]+)
 <S>.                            {sb.push_back(YYText()[0]);}
 
 <INITIAL>'                       {BEGIN S2; sb.clear();}
-<S2><<EOF>>                      {RAISE(Syntax);}
+<S2><<EOF>>                      {throw "Syntax Error";}
 <S2>'                            {BEGIN INITIAL; BuildStr(STRING);}
 <S2>"\\n"                        {sb.push_back('\n');}
 <S2>"\\t"                        {sb.push_back('\t');}
@@ -104,7 +104,7 @@ WHITESPACE           ([ \t]+)
 {IDENTIFIER}                     {BuildLex(IDENTIFIER);}
 
 <<EOF>>                          {return 0;}
-.                                {RAISE(Syntax);}
+.                                {throw "Syntax Error";}
 %%
 
 int yyFlexLexer::yywrap() { return 1; }
